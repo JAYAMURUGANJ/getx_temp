@@ -27,18 +27,4 @@ final ThemeData lightTheme = ThemeData(
 );
 
 // Create dark theme
-final ThemeData darkTheme = ThemeData(
-  brightness: Brightness.dark,
-  primaryColor: primaryColorDark,
-  scaffoldBackgroundColor: Colors.black,
-  appBarTheme: const AppBarTheme(
-    backgroundColor: primaryColorDark,
-    titleTextStyle: TextStyle(color: Colors.white),
-  ),
-  textTheme: const TextTheme(
-    displayLarge: TextStyle(fontSize: 20, color: Colors.white),
-    bodyLarge: TextStyle(fontSize: 16, color: Colors.white),
-  ),
-  colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
-      .copyWith(secondary: accentColorDark),
-);
+
