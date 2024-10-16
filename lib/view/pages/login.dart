@@ -36,7 +36,6 @@ class LoginPage extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.store,
-                      color: Colors.deepOrange,
                       size: 50,
                     ),
                     Text(
@@ -86,9 +85,8 @@ class LoginPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.store,
-                      color: Theme.of(context).colorScheme.primary,
                       size: 50,
                     ),
                     Text(
@@ -106,7 +104,7 @@ class LoginPage extends StatelessWidget {
               10.ph,
               kPasswordTextField(),
               10.ph,
-              kLoginButton(context)
+              kLoginButton(context),
             ],
           ),
         ),

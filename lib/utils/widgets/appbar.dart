@@ -12,7 +12,6 @@ AppBar kAppBar() {
     titleSpacing: 0.5,
     leading: const Icon(
       Icons.store,
-      color: Colors.white,
     ),
     title: const Text(
       "Cashcow",
@@ -22,7 +21,6 @@ AppBar kAppBar() {
       const IconButton(
         icon: Icon(
           Icons.language,
-          color: Colors.white,
         ),
         onPressed: changeLanguage,
       ),
@@ -33,7 +31,6 @@ AppBar kAppBar() {
             themeController.isDarkTheme.value
                 ? Icons.dark_mode
                 : Icons.light_mode,
-            color: Colors.white,
           ),
           onPressed: changeTheme,
         ),

@@ -10,7 +10,7 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -19,15 +19,14 @@ class SplashScreen extends StatelessWidget {
             Icon(
               Icons.store,
               size: 100,
-              color: Theme.of(context).colorScheme.primary,
             ),
-            const SizedBox(height: 20),
-            const Text(
+            SizedBox(height: 20),
+            Text(
               'Welcome to CashCow!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 10),
-            const CircularProgressIndicator(), // Optional loading indicator
+            SizedBox(height: 10),
+            CircularProgressIndicator(), // Optional loading indicator
           ],
         ),
       ),

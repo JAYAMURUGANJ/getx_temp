@@ -5,9 +5,8 @@ import 'package:get/get.dart';
 
 ElevatedButton kLoginButton(BuildContext context) {
   return ElevatedButton(
-    onPressed: () {},
+    onPressed: () => Get.toNamed('/category'),
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.deepOrange,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(10),
@@ -22,16 +21,12 @@ ElevatedButton kLoginButton(BuildContext context) {
         children: [
           const Icon(
             Icons.login_outlined,
-            color: Colors.white,
             size: 30,
           ),
           5.pw,
           Text(
             'login'.tr,
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall!
-                .copyWith(color: Colors.white),
+            style: Theme.of(context).textTheme.headlineSmall!,
           ),
         ],
       ),
