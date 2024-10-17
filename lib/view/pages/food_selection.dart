@@ -1,11 +1,12 @@
+import 'package:cashcow/model/food_category.dart';
 import 'package:cashcow/utils/extension/sizedbox.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/cart_controller.dart';
 import '../../controllers/food_menu_controller.dart';
 import '../../utils/widgets/catch_network_img.dart';
 import 'cart.dart';
-import 'package:cashcow/model/food_category.dart';
 
 class FoodMenuSelection extends StatefulWidget {
   const FoodMenuSelection({super.key});
@@ -39,13 +40,17 @@ class _FoodMenuSelectionState extends State<FoodMenuSelection> {
           // Inside your widget where the IconButton is located
           Obx(
             () => IconButton(
-              icon: Badge.count(
-                count: cartController
-                    .totalQuantity, // Display the total quantity of items
-                child: const Icon(
-                  Icons.shopping_cart,
-                ),
-              ),
+              icon: cartController.cartItems.isNotEmpty
+                  ? Badge.count(
+                      count: cartController.cartItems
+                          .length, // Display the total quantity of items
+                      child: const Icon(
+                        Icons.shopping_cart,
+                      ),
+                    )
+                  : const Icon(
+                      Icons.shopping_cart_outlined,
+                    ),
               onPressed: () => Get.to(() => CartPage()),
             ),
           ),
@@ -149,7 +154,10 @@ class _FoodMenuSelectionState extends State<FoodMenuSelection> {
                                   onTap: () {
                                     Get.find<CartController>().addToCart(item);
                                     Get.snackbar(
-                                        'Added to Cart', '${item.name}');
+                                      'Added to Cart',
+                                      '${item.name}',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
                                   },
                                   child: Column(
                                     children: [
