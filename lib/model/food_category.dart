@@ -1,10 +1,18 @@
+import 'package:hive/hive.dart';
+
+part 'food_category.g.dart';
+
+@HiveType(typeId: 4) // Choose a unique typeId for this class
 class FoodCategory {
+  @HiveField(0)
   String name;
+
+  @HiveField(1)
   String imagePath;
 
   FoodCategory({required this.name, required this.imagePath});
 
-  // This factory constructor is useful if you're getting category data from a JSON file or API
+  // Factory constructor to create FoodCategory from JSON
   factory FoodCategory.fromJson(Map<String, dynamic> json) {
     return FoodCategory(
       name: json['name'],
@@ -12,7 +20,7 @@ class FoodCategory {
     );
   }
 
-  // For converting to JSON if necessary
+  // Convert FoodCategory to JSON
   Map<String, dynamic> toJson() {
     return {
       'name': name,

@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 ElevatedButton kLoginButton(BuildContext context) {
   return ElevatedButton(
-    onPressed: () => Get.toNamed('/category'),
+    onPressed: () => Get.offAllNamed('/home'),
     style: ElevatedButton.styleFrom(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(

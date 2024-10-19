@@ -1,9 +1,10 @@
 import 'package:cashcow/controllers/cart_controller.dart';
 import 'package:cashcow/controllers/food_menu_controller.dart';
 import 'package:get/get.dart';
+
+import 'controllers/localization_controller.dart';
 import 'controllers/splash_controller.dart';
 import 'controllers/theme_controller.dart';
-import 'controllers/localization_controller.dart';
 
 class AppBindings extends Bindings {
   @override

@@ -4,11 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
+import '../../model/order_status.dart';
 import '../../model/order_type.dart';
+import '../../model/payement_type.dart';
+import '../../utils/class/hive/order_service.dart';
 import '../../utils/widgets/catch_network_img.dart';
 
 class CartPage extends StatelessWidget {
-  final CartController cartController = Get.put(CartController());
+  final CartController cartController = Get.find();
+
+  final OrderServiceController orderService = Get.find();
 
   CartPage({super.key});
 
@@ -215,7 +220,7 @@ class CartPage extends StatelessWidget {
                       ),
                       // Item price (Updated price based on the reactive quantity)
                       Text(
-                        "\$${((item.price ?? 0) * (item.quantity)).toStringAsFixed(2)}",
+                        "\$${((item.price ?? 0) * (item.quantity ?? 1)).toStringAsFixed(2)}",
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
@@ -242,7 +247,6 @@ class CartPage extends StatelessWidget {
 
   void showOrderTypeBottomSheet() {
     final formKey = GlobalKey<FormState>(); // Add a form key
-    List<Order> orders = [];
     Get.bottomSheet(
       SingleChildScrollView(
         child: Column(
@@ -258,12 +262,16 @@ class CartPage extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             // ChoiceChip for selecting Order Type
-            Wrap(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               spacing: 8.0,
               children: orderType.map(
                 (type) {
                   return Obx(
                     () => ChoiceChip(
+                      backgroundColor: Colors.transparent,
+                      selectedColor: Colors.orangeAccent,
+                      shape: const StadiumBorder(side: BorderSide()),
                       label: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -273,33 +281,35 @@ class CartPage extends StatelessWidget {
                           Text("${type.name}"),
                         ],
                       ),
-                      selected: cartController.selectedOrderType.value == type,
+                      selected:
+                          cartController.selectedOrderType.value == type.id,
                       onSelected: (selected) {
-                        cartController.selectOrderType(selected ? type : null);
+                        cartController
+                            .selectOrderType(selected ? type.id : null);
                       },
-                      selectedColor: Colors.blueAccent,
-                      backgroundColor: Colors.grey[300],
                     ),
                   );
                 },
               ).toList(),
             ),
-            const SizedBox(height: 10),
+            10.ph,
+            const Divider(),
             // Additional content based on selected order type (e.g., Table selection or Phone number)
             Obx(() {
-              if (cartController.selectedOrderType.value?.id == 1) {
+              if (cartController.selectedOrderType.value == 1) {
                 // Din in selected, show table selection
                 return Wrap(
                   spacing: 8.0,
                   children: List.generate(10, (index) {
                     int tableNumber = index + 1;
                     return ChoiceChip(
+                      backgroundColor: Colors.transparent,
+                      shape: const StadiumBorder(side: BorderSide()),
                       label: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          Text('$tableNumber'),
                           const Icon(Icons.deck_outlined, size: 18),
-                          const SizedBox(width: 4),
-                          Text('Table $tableNumber'),
                         ],
                       ),
                       selected:
@@ -309,8 +319,6 @@ class CartPage extends StatelessWidget {
                           cartController.selectedTable(tableNumber);
                         }
                       },
-                      selectedColor: Colors.blueAccent,
-                      backgroundColor: Colors.grey[300],
                     );
                   }),
                 );
@@ -320,66 +328,121 @@ class CartPage extends StatelessWidget {
             Form(
               key: formKey, // Attach the form key
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextFormField(
-                  decoration: const InputDecoration(
-                    labelText: 'Enter Phone Number',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  controller: cartController.phoneController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
-                    } else if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
-                      return 'Please enter a valid 10-digit phone number';
-                    }
-                    return null;
-                  },
+                padding: const EdgeInsets.all(18.0),
+                child: Column(
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Customer Name',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.name,
+                      controller: cartController
+                          .customerNameController, // Assuming you have a nameController in cartController
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a customer name';
+                        }
+                        return null;
+                      },
+                    ),
+                    16.ph,
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Phone Number',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      controller: cartController.phoneController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a phone number';
+                        } else if (!RegExp(r'^[0-9]{10}$').hasMatch(value)) {
+                          return 'Please enter a valid 10-digit phone number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
             const SizedBox(height: 10),
             // Buttons
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
-                onPressed: () {
-                  if (formKey.currentState!.validate()) {
-                    // Proceed if the form is valid
-                    if (cartController.selectedOrderType.value != null) {
-                      orders.add(Order(
-                          type: cartController.selectedOrderType.value!,
-                          items: cartController.cartItems,
-                          phoneNo: cartController.phoneController.text,
-                          tableNo: cartController.selectedTable.value,
-                          dateTime: DateTime.now()));
-                      debugPrint(orders.length.toString());
-                      debugPrint(orders[0].phoneNo.toString());
+                  onPressed: () async {
+                    // Check if the form is valid
+                    if (formKey.currentState!.validate()) {
+                      // Check if an order type is selected and if there are cart items
+                      if (cartController.selectedOrderType.value != null &&
+                          cartController.cartItems.isNotEmpty) {
+                        try {
+                          // Show loading indicator
+                          //  var orderNo = orderService.readOrders().length + 1;
+                          // Create the order
+                          Order newOrder = Order(
+                            orderTrackId: DateTime.now().toIso8601String(),
+                            orderTypeId:
+                                cartController.selectedOrderType.value!,
+                            items: cartController.cartItems,
+                            customerName: cartController
+                                    .customerNameController.text.isNotEmpty
+                                ? cartController.customerNameController.text
+                                : null,
+                            phoneNo:
+                                cartController.phoneController.text.isNotEmpty
+                                    ? cartController.phoneController.text
+                                    : null, // Allow nullable phone number
+                            tableNo: cartController.selectedTable.value,
+                            startDateTime: DateTime.now(),
+                            orderStatus: orderStatusList[0]
+                                .id, // Set the default status to the first one
+                            endDateTime:
+                                null, // End time will be updated when the order is completed
+                            payementStatus: getPaymentTypes[0].id,
+                          );
+                          // Use the OrderService to save the order
+                          await orderService.createOrder(newOrder);
+                          // Reset the form and cart after successful creation
+                          formKey.currentState!.reset();
+                          // Assuming you have a clearCart() method
+                          cartController.selectedOrderType.value = null;
+                          cartController.customerNameController.clear();
+                          cartController.phoneController.clear();
+                          cartController.clearCart();
+                        } catch (e) {
+                          // Handle any errors during the order creation
+                        } finally {
+                          // Hide the loading indicator
+                        }
+                      } else {
+                        // Notify the user to select an order type and add items to the cart
+                      }
                     }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Background color
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 14), // Larger buttons
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
-                  ),
-                ),
-                child: const SizedBox(
-                  width: double.infinity,
-                  child: Text(
-                    'Confirm',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green, // Background color
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 14), // Larger buttons
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(10), // Rounded corners
                     ),
                   ),
-                ),
-              ),
+                  child: const SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      'Confirm',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                  )),
             ),
             const SizedBox(height: 16),
           ],

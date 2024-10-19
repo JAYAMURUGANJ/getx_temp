@@ -1,12 +1,35 @@
+import 'package:hive/hive.dart';
+
+part 'food_menu.g.dart';
+
+@HiveType(typeId: 1)
 class FoodMenu {
+  @HiveField(0)
   String? id;
+
+  @HiveField(1)
   String? img;
+
+  @HiveField(2)
   String? name;
+
+  @HiveField(3)
   String? dsc;
+
+  @HiveField(4)
   double? price;
+
+  @HiveField(5)
   int? rate;
+
+  @HiveField(6)
   String? country;
-  late int quantity;
+
+  @HiveField(7)
+  late int? quantity;
+
+  @HiveField(8)
+  late bool? isPrepared;
 
   FoodMenu(
       {this.id,
@@ -16,8 +39,10 @@ class FoodMenu {
       this.price,
       this.rate,
       this.country,
-      this.quantity = 1});
+      this.quantity = 1,
+      this.isPrepared = false});
 
+  // Optional: JSON serialization/deserialization
   FoodMenu.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     img = json['img'];
@@ -26,7 +51,8 @@ class FoodMenu {
     price = json['price']?.toDouble();
     rate = json['rate'];
     country = json['country'];
-    quantity = json['quantity'] ?? 1;
+    quantity = 1;
+    isPrepared = false;
   }
 
   Map<String, dynamic> toJson() {
@@ -39,6 +65,7 @@ class FoodMenu {
     data['rate'] = rate;
     data['country'] = country;
     data['quantity'] = quantity;
+    data['is_prepared'] = isPrepared;
     return data;
   }
 }

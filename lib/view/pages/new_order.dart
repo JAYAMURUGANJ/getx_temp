@@ -5,19 +5,20 @@ import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
 import '../../controllers/food_menu_controller.dart';
+import '../../utils/class/hive/order_service.dart';
 import '../../utils/widgets/catch_network_img.dart';
-import 'cart.dart';
 
-class FoodMenuSelection extends StatefulWidget {
-  const FoodMenuSelection({super.key});
+class NewOrderPage extends StatefulWidget {
+  const NewOrderPage({super.key});
 
   @override
-  _FoodMenuSelectionState createState() => _FoodMenuSelectionState();
+  _NewOrderPageState createState() => _NewOrderPageState();
 }
 
-class _FoodMenuSelectionState extends State<FoodMenuSelection> {
-  int selectedCategoryIndex = 0; // To track the selected category
+class _NewOrderPageState extends State<NewOrderPage> {
+  int selectedCategoryIndex = 0;
   final FoodMenuController foodMenuController = Get.find();
+  final OrderServiceController orderService = Get.find();
   final CartController cartController = Get.find();
   String searchQuery = '';
 
@@ -26,36 +27,13 @@ class _FoodMenuSelectionState extends State<FoodMenuSelection> {
     super.initState();
     // Load menu items based on initial category selection
     foodMenuController.loadMenuFromCategory(categories[selectedCategoryIndex]);
+    // Open the Hive box when the widget is created
+    orderService.openBox();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Food Menu',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        actions: [
-          // Inside your widget where the IconButton is located
-          Obx(
-            () => IconButton(
-              icon: cartController.cartItems.isNotEmpty
-                  ? Badge.count(
-                      count: cartController.cartItems
-                          .length, // Display the total quantity of items
-                      child: const Icon(
-                        Icons.shopping_cart,
-                      ),
-                    )
-                  : const Icon(
-                      Icons.shopping_cart_outlined,
-                    ),
-              onPressed: () => Get.to(() => CartPage()),
-            ),
-          ),
-        ],
-      ),
       body: Column(
         children: [
           // Search Bar
@@ -63,47 +41,7 @@ class _FoodMenuSelectionState extends State<FoodMenuSelection> {
             child: Row(
               children: [
                 // Scrollable NavigationRail for categories
-                NavigationRail(
-                  leading: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5.0),
-                    child: Text(
-                      "Category",
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ),
-                  selectedIndex: selectedCategoryIndex,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      selectedCategoryIndex = index;
-                    });
-                    // Load menu based on selected category
-                    foodMenuController.loadMenuFromCategory(categories[index]);
-                  },
-                  labelType: NavigationRailLabelType.all,
-                  destinations: categories.map((category) {
-                    return NavigationRailDestination(
-                      icon: Padding(
-                        padding: const EdgeInsets.only(top: 5.0),
-                        child: Image.asset(
-                          category.imagePath,
-                          width: 30,
-                          height: 30,
-                          fit: BoxFit.fitWidth,
-                        ),
-                      ),
-                      selectedIcon: Padding(
-                        padding: const EdgeInsets.only(top: 5.0),
-                        child: Image.asset(
-                          category.imagePath,
-                          width: 45,
-                          height: 40,
-                          fit: BoxFit.fitWidth,
-                        ),
-                      ),
-                      label: Text(category.name.capitalize.toString()),
-                    );
-                  }).toList(),
-                ),
+                _foodCategory(context),
 
                 // Divider between navigation and content
                 const VerticalDivider(thickness: 1, width: 1),
@@ -152,7 +90,7 @@ class _FoodMenuSelectionState extends State<FoodMenuSelection> {
                                 elevation: 5,
                                 child: GestureDetector(
                                   onTap: () {
-                                    Get.find<CartController>().addToCart(item);
+                                    cartController.addToCart(item);
                                     Get.snackbar(
                                       'Added to Cart',
                                       '${item.name}',
@@ -231,6 +169,72 @@ class _FoodMenuSelectionState extends State<FoodMenuSelection> {
           ),
         ],
       ),
+    );
+  }
+
+  NavigationRail _foodCategory(BuildContext context) {
+    return NavigationRail(
+      leading: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5.0),
+        child: Text(
+          "Category",
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ),
+      trailing: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5.0),
+        child: Obx(() {
+          // Ensure that orders is an observable
+          var orders = orderService
+              .readOrders(); // Assuming orders is an observable list
+
+          return IconButton(
+            icon: orders.isNotEmpty
+                ? Badge.count(
+                    count: orders.length, // Display the total count of orders
+                    child: const Icon(
+                      Icons.shopping_cart,
+                    ),
+                  )
+                : const Icon(
+                    Icons.rice_bowl_outlined,
+                  ),
+            onPressed: () => Get.toNamed("/kitchen"),
+          );
+        }),
+      ),
+      selectedIndex: selectedCategoryIndex,
+      onDestinationSelected: (int index) {
+        setState(() {
+          selectedCategoryIndex = index;
+        });
+        // Load menu based on selected category
+        foodMenuController.loadMenuFromCategory(categories[index]);
+      },
+      labelType: NavigationRailLabelType.all,
+      destinations: categories.map((category) {
+        return NavigationRailDestination(
+          icon: Padding(
+            padding: const EdgeInsets.only(top: 5.0),
+            child: Image.asset(
+              category.imagePath,
+              width: 30,
+              height: 30,
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+          selectedIcon: Padding(
+            padding: const EdgeInsets.only(top: 5.0),
+            child: Image.asset(
+              category.imagePath,
+              width: 45,
+              height: 40,
+              fit: BoxFit.fitWidth,
+            ),
+          ),
+          label: Text(category.name.capitalize.toString()),
+        );
+      }).toList(),
     );
   }
 }

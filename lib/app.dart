@@ -3,10 +3,13 @@ import 'package:cashcow/view/pages/menu.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'app_translations.dart';
 import 'model/food_category.dart';
-import 'view/pages/food_selection.dart';
+import 'view/pages/home.dart';
+import 'view/pages/kitchen.dart';
 import 'view/pages/login.dart';
+import 'view/pages/new_order.dart';
 import 'view/pages/splash.dart';
 
 class MyApp extends StatelessWidget {
@@ -31,9 +34,13 @@ class MyApp extends StatelessWidget {
             name: '/',
             page: () => SplashScreen()), // SplashScreen as the first route
         GetPage(name: '/login', page: () => LoginPage()), // LoginPage route
+        GetPage(name: '/home', page: () => const HomePage()), // LoginPage route
         GetPage(
-            name: '/category',
-            page: () => const FoodMenuSelection()), // LoginPage route
+            name: '/neworder',
+            page: () => const NewOrderPage()), // LoginPage route
+        GetPage(
+            name: '/kitchen',
+            page: () => const KitchenPage()), // LoginPage route
         GetPage(
             name: '/menu',
             page: () => MenuPage(
