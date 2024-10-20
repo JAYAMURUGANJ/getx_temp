@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
 import '../../controllers/food_menu_controller.dart';
-import '../../utils/class/hive/order_service.dart';
+import '../../controllers/hive/order_controller.dart';
 import '../../utils/widgets/catch_network_img.dart';
 
 class NewOrderPage extends StatefulWidget {
@@ -18,7 +18,7 @@ class NewOrderPage extends StatefulWidget {
 class _NewOrderPageState extends State<NewOrderPage> {
   int selectedCategoryIndex = 0;
   final FoodMenuController foodMenuController = Get.find();
-  final OrderServiceController orderService = Get.find();
+  final OrderServiceController orderServiceController = Get.find();
   final CartController cartController = Get.find();
   String searchQuery = '';
 
@@ -28,7 +28,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
     // Load menu items based on initial category selection
     foodMenuController.loadMenuFromCategory(categories[selectedCategoryIndex]);
     // Open the Hive box when the widget is created
-    orderService.openBox();
+    orderServiceController.openBox();
   }
 
   @override
@@ -185,21 +185,27 @@ class _NewOrderPageState extends State<NewOrderPage> {
         padding: const EdgeInsets.symmetric(vertical: 5.0),
         child: Obx(() {
           // Ensure that orders is an observable
-          var orders = orderService
-              .readOrders(); // Assuming orders is an observable list
+          var ordersCount = orderServiceController
+              .orders.length; // Assuming orders is an observable list
 
           return IconButton(
-            icon: orders.isNotEmpty
+            icon: ordersCount != 0
                 ? Badge.count(
-                    count: orders.length, // Display the total count of orders
+                    textStyle: const TextStyle(fontSize: 18),
+                    count: ordersCount, // Display the total count of orders
                     child: const Icon(
-                      Icons.shopping_cart,
+                      Icons.rice_bowl_outlined,
+                      size: 50,
                     ),
                   )
                 : const Icon(
                     Icons.rice_bowl_outlined,
+                    size: 50,
                   ),
-            onPressed: () => Get.toNamed("/kitchen"),
+            onPressed: () {
+              orderServiceController.orders.refresh();
+              Get.toNamed("/kitchen");
+            },
           );
         }),
       ),

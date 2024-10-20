@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'order_status.g.dart';
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 3)
 class OrderStatus {
   @HiveField(0)
   int? id;

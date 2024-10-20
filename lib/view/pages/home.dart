@@ -1,8 +1,8 @@
+import 'package:cashcow/view/pages/kitchen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
-import 'kitchen.dart';
 import 'new_order.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,8 +12,24 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   final CartController cartController = Get.find();
+  late TabController tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the TabController
+    tabController = TabController(length: 3, vsync: this); // Assuming 3 tabs
+  }
+
+  @override
+  void dispose() {
+    tabController.dispose(); // Dispose the controller to avoid memory leaks
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

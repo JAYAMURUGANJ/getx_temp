@@ -8,7 +8,7 @@ part of 'order_status.dart';
 
 class OrderStatusAdapter extends TypeAdapter<OrderStatus> {
   @override
-  final int typeId = 2;
+  final int typeId = 3;
 
   @override
   OrderStatus read(BinaryReader reader) {

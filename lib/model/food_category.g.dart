@@ -8,7 +8,7 @@ part of 'food_category.dart';
 
 class FoodCategoryAdapter extends TypeAdapter<FoodCategory> {
   @override
-  final int typeId = 4;
+  final int typeId = 1;
 
   @override
   FoodCategory read(BinaryReader reader) {

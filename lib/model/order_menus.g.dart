@@ -1,55 +1,58 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'order.dart';
+part of 'order_menus.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class OrderAdapter extends TypeAdapter<Order> {
+class OrderMenusAdapter extends TypeAdapter<OrderMenus> {
   @override
-  final int typeId = 5;
+  final int typeId = 7;
 
   @override
-  Order read(BinaryReader reader) {
+  OrderMenus read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Order(
-      orderTypeId: fields[0] as int,
-      phoneNo: fields[1] as String?,
-      tableNo: fields[2] as int?,
-      startDateTime: fields[3] as DateTime,
-      endDateTime: fields[4] as DateTime?,
-      orderStatus: fields[5] as int?,
-      payementStatus: fields[6] as int?,
-      customerName: fields[7] as String?,
-      orderTrackId: fields[8] as String?,
+    return OrderMenus(
+      id: fields[0] as String?,
+      img: fields[1] as String?,
+      name: fields[2] as String?,
+      dsc: fields[3] as String?,
+      price: fields[4] as double?,
+      rate: fields[5] as int?,
+      country: fields[6] as String?,
+      quantity: fields[7] as int?,
+      isPrepared: fields[8] as bool?,
+      orderTrackId: fields[10] as String?,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Order obj) {
+  void write(BinaryWriter writer, OrderMenus obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
-      ..write(obj.orderTypeId)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.phoneNo)
+      ..write(obj.img)
       ..writeByte(2)
-      ..write(obj.tableNo)
+      ..write(obj.name)
       ..writeByte(3)
-      ..write(obj.startDateTime)
+      ..write(obj.dsc)
       ..writeByte(4)
-      ..write(obj.endDateTime)
+      ..write(obj.price)
       ..writeByte(5)
-      ..write(obj.orderStatus)
+      ..write(obj.rate)
       ..writeByte(6)
-      ..write(obj.payementStatus)
+      ..write(obj.country)
       ..writeByte(7)
-      ..write(obj.customerName)
+      ..write(obj.quantity)
       ..writeByte(8)
+      ..write(obj.isPrepared)
+      ..writeByte(10)
       ..write(obj.orderTrackId);
   }
 
@@ -59,7 +62,7 @@ class OrderAdapter extends TypeAdapter<Order> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is OrderAdapter &&
+      other is OrderMenusAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

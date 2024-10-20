@@ -1,9 +1,9 @@
 import 'package:hive/hive.dart';
 
-part 'food_menu.g.dart';
+part 'order_menus.g.dart';
 
-@HiveType(typeId: 2)
-class FoodMenu {
+@HiveType(typeId: 7)
+class OrderMenus {
   @HiveField(0)
   String? id;
 
@@ -31,19 +31,24 @@ class FoodMenu {
   @HiveField(8)
   late bool? isPrepared;
 
-  FoodMenu(
-      {this.id,
-      this.img,
-      this.name,
-      this.dsc,
-      this.price,
-      this.rate,
-      this.country,
-      this.quantity = 1,
-      this.isPrepared = false});
+  @HiveField(10)
+  String? orderTrackId;
+
+  OrderMenus({
+    this.id,
+    this.img,
+    this.name,
+    this.dsc,
+    this.price,
+    this.rate,
+    this.country,
+    this.quantity = 1,
+    this.isPrepared = false,
+    this.orderTrackId,
+  });
 
   // Optional: JSON serialization/deserialization
-  FoodMenu.fromJson(Map<String, dynamic> json) {
+  OrderMenus.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     img = json['img'];
     name = json['name'];
@@ -53,6 +58,7 @@ class FoodMenu {
     country = json['country'];
     quantity = 1;
     isPrepared = false;
+    orderTrackId = "";
   }
 
   Map<String, dynamic> toJson() {
@@ -66,10 +72,12 @@ class FoodMenu {
     data['country'] = country;
     data['quantity'] = quantity;
     data['is_prepared'] = isPrepared;
+    data['order_track_id'] = orderTrackId;
     return data;
   }
 
-  FoodMenu copyWith({
+  // copyWith method for creating a modified instance of OrderMenus
+  OrderMenus copyWith({
     String? id,
     String? img,
     String? name,
@@ -79,8 +87,9 @@ class FoodMenu {
     String? country,
     int? quantity,
     bool? isPrepared,
+    String? orderTrackId,
   }) {
-    return FoodMenu(
+    return OrderMenus(
       id: id ?? this.id,
       img: img ?? this.img,
       name: name ?? this.name,
@@ -90,6 +99,7 @@ class FoodMenu {
       country: country ?? this.country,
       quantity: quantity ?? this.quantity,
       isPrepared: isPrepared ?? this.isPrepared,
+      orderTrackId: orderTrackId ?? this.orderTrackId,
     );
   }
 }

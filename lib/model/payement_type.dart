@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'payement_type.g.dart';
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 6)
 class PaymentType {
   @HiveField(0)
   int? id;

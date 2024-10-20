@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'order_type.g.dart';
 
-@HiveType(typeId: 2)
+@HiveType(typeId: 4)
 class OrderType {
   @HiveField(0)
   int? id;

@@ -1,13 +1,15 @@
 import 'package:cashcow/model/order.dart';
+import 'package:cashcow/utils/extension/datetime.dart';
 import 'package:cashcow/utils/extension/sizedbox.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/cart_controller.dart';
+import '../../model/order_menus.dart';
 import '../../model/order_status.dart';
 import '../../model/order_type.dart';
 import '../../model/payement_type.dart';
-import '../../utils/class/hive/order_service.dart';
+import '../../controllers/hive/order_controller.dart';
 import '../../utils/widgets/catch_network_img.dart';
 
 class CartPage extends StatelessWidget {
@@ -37,119 +39,124 @@ class CartPage extends StatelessWidget {
     );
   }
 
-  BottomAppBar _makeOrder() {
-    return BottomAppBar(
-      height: 150, // Slightly increased height for better spacing
-      child: Padding(
-        padding: const EdgeInsets.all(8.0), // Added padding for a cleaner look
-        child: Column(
-          children: [
-            // Total cost row
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _makeOrder() {
+    return cartController.cartItems.isNotEmpty
+        ? BottomAppBar(
+            height: 150, // Slightly increased height for better spacing
+            child: Padding(
+              padding:
+                  const EdgeInsets.all(8.0), // Added padding for a cleaner look
+              child: Column(
                 children: [
-                  const Text(
-                    'Amount To Pay:',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  // Total cost row
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Amount To Pay:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Obx(() => Text(
+                              '\$${cartController.totalCost.value.toStringAsFixed(2)}', // Dynamic total cost using Obx
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors
+                                    .black87, // Slightly darkened for better contrast
+                              ),
+                            )),
+                      ],
                     ),
                   ),
-                  Obx(() => Text(
-                        '\$${cartController.totalCost.value.toStringAsFixed(2)}', // Dynamic total cost using Obx
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors
-                              .black87, // Slightly darkened for better contrast
+                  // cancel or Make order
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        //cancel button
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // Logic to cancel the order
+                              cartController.clearCart();
+                              Get.snackbar(
+                                'Order Cancelled',
+                                'Your order has been successfully cancelled.',
+                                backgroundColor:
+                                    Colors.redAccent, // Alert color
+                                snackPosition: SnackPosition.TOP,
+                                margin: const EdgeInsets.all(8.0),
+                              );
+                            },
+                            icon: const Icon(Icons.cancel, color: Colors.white),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red, // Background color
+                              padding: const EdgeInsets.symmetric(
+                                  vertical:
+                                      14), // More padding for larger buttons
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    10), // Rounded button corners
+                              ),
+                            ),
+                            label: const Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ), // Spacing between buttons
+                        10.pw,
+                        //order button
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              // Logic to place order
+                              showOrderTypeBottomSheet();
+                              Get.snackbar(
+                                'Order Placed',
+                                'Your order has been placed successfully.',
+                                backgroundColor: Colors.green,
+                                snackPosition: SnackPosition.TOP,
+                                margin: const EdgeInsets.all(8.0),
+                              );
+                            },
+                            icon: const Icon(Icons.shopping_cart,
+                                color: Colors.white),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green, // Background color
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14), // Larger buttons
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    10), // Rounded corners
+                              ),
+                            ),
+                            label: const Text(
+                              'Order',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
-                      )),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-            // cancel or Make order
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  //cancel button
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Logic to cancel the order
-                        cartController.clearCart();
-                        Get.snackbar(
-                          'Order Cancelled',
-                          'Your order has been successfully cancelled.',
-                          backgroundColor: Colors.redAccent, // Alert color
-                          snackPosition: SnackPosition.TOP,
-                          margin: const EdgeInsets.all(8.0),
-                        );
-                      },
-                      icon: const Icon(Icons.cancel, color: Colors.white),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red, // Background color
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 14), // More padding for larger buttons
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              10), // Rounded button corners
-                        ),
-                      ),
-                      label: const Text(
-                        'Cancel',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ), // Spacing between buttons
-                  10.pw,
-                  //order button
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Logic to place order
-                        showOrderTypeBottomSheet();
-                        Get.snackbar(
-                          'Order Placed',
-                          'Your order has been placed successfully.',
-                          backgroundColor: Colors.green,
-                          snackPosition: SnackPosition.TOP,
-                          margin: const EdgeInsets.all(8.0),
-                        );
-                      },
-                      icon:
-                          const Icon(Icons.shopping_cart, color: Colors.white),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green, // Background color
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 14), // Larger buttons
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(10), // Rounded corners
-                        ),
-                      ),
-                      label: const Text(
-                        'Order',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          )
+        : const SizedBox.shrink();
   }
 
   Widget _emptyCart(context) {
@@ -264,7 +271,6 @@ class CartPage extends StatelessWidget {
             // ChoiceChip for selecting Order Type
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              spacing: 8.0,
               children: orderType.map(
                 (type) {
                   return Obx(
@@ -297,7 +303,7 @@ class CartPage extends StatelessWidget {
             // Additional content based on selected order type (e.g., Table selection or Phone number)
             Obx(() {
               if (cartController.selectedOrderType.value == 1) {
-                // Din in selected, show table selection
+                // Dine-in selected, show table selection
                 return Wrap(
                   spacing: 8.0,
                   children: List.generate(10, (index) {
@@ -337,8 +343,7 @@ class CartPage extends StatelessWidget {
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.name,
-                      controller: cartController
-                          .customerNameController, // Assuming you have a nameController in cartController
+                      controller: cartController.customerNameController,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter a customer name';
@@ -378,15 +383,13 @@ class CartPage extends StatelessWidget {
                       // Check if an order type is selected and if there are cart items
                       if (cartController.selectedOrderType.value != null &&
                           cartController.cartItems.isNotEmpty) {
+                        String orderTrackId = DateTime.now().toOrderId();
                         try {
-                          // Show loading indicator
-                          //  var orderNo = orderService.readOrders().length + 1;
                           // Create the order
                           Order newOrder = Order(
-                            orderTrackId: DateTime.now().toIso8601String(),
+                            orderTrackId: orderTrackId,
                             orderTypeId:
                                 cartController.selectedOrderType.value!,
-                            items: cartController.cartItems,
                             customerName: cartController
                                     .customerNameController.text.isNotEmpty
                                 ? cartController.customerNameController.text
@@ -397,38 +400,72 @@ class CartPage extends StatelessWidget {
                                     : null, // Allow nullable phone number
                             tableNo: cartController.selectedTable.value,
                             startDateTime: DateTime.now(),
-                            orderStatus: orderStatusList[0]
-                                .id, // Set the default status to the first one
+                            orderStatus:
+                                orderStatusList[0].id, // Default status
                             endDateTime:
                                 null, // End time will be updated when the order is completed
                             payementStatus: getPaymentTypes[0].id,
                           );
-                          // Use the OrderService to save the order
-                          await orderService.createOrder(newOrder);
+                          List<OrderMenus> orderMenus =
+                              cartController.cartItems.map((foodMenu) {
+                            return OrderMenus(
+                              id: foodMenu.id,
+                              img: foodMenu.img,
+                              name: foodMenu.name,
+                              dsc: foodMenu.dsc,
+                              price: foodMenu.price,
+                              rate: foodMenu.rate,
+                              country: foodMenu.country,
+                              quantity: foodMenu.quantity,
+                              isPrepared: foodMenu.isPrepared,
+                              orderTrackId:
+                                  orderTrackId, // Set the same orderTrackId
+                            );
+                          }).toList();
+                          await orderService.createOrder(newOrder, orderMenus);
+
+                          orderService.orders.refresh();
+
                           // Reset the form and cart after successful creation
                           formKey.currentState!.reset();
-                          // Assuming you have a clearCart() method
                           cartController.selectedOrderType.value = null;
                           cartController.customerNameController.clear();
                           cartController.phoneController.clear();
                           cartController.clearCart();
+
+                          Get.snackbar(
+                            'Order Placed',
+                            'Your order has been placed successfully.',
+                            backgroundColor: Colors.green,
+                            snackPosition: SnackPosition.TOP,
+                            margin: const EdgeInsets.all(8.0),
+                          );
                         } catch (e) {
                           // Handle any errors during the order creation
-                        } finally {
-                          // Hide the loading indicator
+                          Get.snackbar(
+                            'Error',
+                            'Failed to place order: ${e.toString()}',
+                            backgroundColor: Colors.red,
+                            snackPosition: SnackPosition.TOP,
+                            margin: const EdgeInsets.all(8.0),
+                          );
                         }
                       } else {
-                        // Notify the user to select an order type and add items to the cart
+                        Get.snackbar(
+                          'Warning',
+                          'Please select an order type and add items to the cart.',
+                          backgroundColor: Colors.orange,
+                          snackPosition: SnackPosition.TOP,
+                          margin: const EdgeInsets.all(8.0),
+                        );
                       }
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green, // Background color
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 14), // Larger buttons
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(10), // Rounded corners
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   child: const SizedBox(
@@ -449,7 +486,7 @@ class CartPage extends StatelessWidget {
         ),
       ),
       backgroundColor: Colors.white,
-      isScrollControlled: true, // Allows the bottom sheet to be flexible
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),

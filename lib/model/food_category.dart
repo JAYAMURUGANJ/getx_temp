@@ -2,7 +2,7 @@ import 'package:hive/hive.dart';
 
 part 'food_category.g.dart';
 
-@HiveType(typeId: 4) // Choose a unique typeId for this class
+@HiveType(typeId: 1) // Choose a unique typeId for this class
 class FoodCategory {
   @HiveField(0)
   String name;
