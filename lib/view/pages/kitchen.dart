@@ -82,6 +82,23 @@ class _KitchenPageState extends State<KitchenPage> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: const Text("Tap to view details"),
+                trailing: order.orderStatus == 1
+                    ? const Icon(
+                        Icons.linear_scale_outlined,
+                        size: 40,
+                        color: Colors.amber,
+                      )
+                    : order.orderStatus == 6
+                        ? const Icon(
+                            Icons.close,
+                            size: 40,
+                            color: Colors.greenAccent,
+                          )
+                        : const Icon(
+                            Icons.check_sharp,
+                            size: 40,
+                            color: Colors.greenAccent,
+                          ),
                 onTap: () {
                   // Navigate to the OrderDetailsPage with the order data
                   Get.to(() => OrderDetailsPage(order: order));

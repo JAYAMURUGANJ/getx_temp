@@ -40,123 +40,127 @@ class CartPage extends StatelessWidget {
   }
 
   Widget _makeOrder() {
-    return cartController.cartItems.isNotEmpty
-        ? BottomAppBar(
-            height: 150, // Slightly increased height for better spacing
-            child: Padding(
-              padding:
-                  const EdgeInsets.all(8.0), // Added padding for a cleaner look
-              child: Column(
-                children: [
-                  // Total cost row
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Amount To Pay:',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+    return Obx(() {
+      return cartController.cartItems.isNotEmpty
+          ? BottomAppBar(
+              height: 150, // Slightly increased height for better spacing
+              child: Padding(
+                padding: const EdgeInsets.all(
+                    8.0), // Added padding for a cleaner look
+                child: Column(
+                  children: [
+                    // Total cost row
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Amount To Pay:',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Obx(() => Text(
-                              '\$${cartController.totalCost.value.toStringAsFixed(2)}', // Dynamic total cost using Obx
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors
-                                    .black87, // Slightly darkened for better contrast
-                              ),
-                            )),
-                      ],
+                          Obx(() => Text(
+                                '\$${cartController.totalCost.value.toStringAsFixed(2)}', // Dynamic total cost using Obx
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors
+                                      .black87, // Slightly darkened for better contrast
+                                ),
+                              )),
+                        ],
+                      ),
                     ),
-                  ),
-                  // cancel or Make order
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        //cancel button
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // Logic to cancel the order
-                              cartController.clearCart();
-                              Get.snackbar(
-                                'Order Cancelled',
-                                'Your order has been successfully cancelled.',
+                    // cancel or Make order
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          //cancel button
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                // Logic to cancel the order
+                                cartController.clearCart();
+                                Get.snackbar(
+                                  'Order Cancelled',
+                                  'Your order has been successfully cancelled.',
+                                  backgroundColor:
+                                      Colors.redAccent, // Alert color
+                                  snackPosition: SnackPosition.TOP,
+                                  margin: const EdgeInsets.all(8.0),
+                                );
+                              },
+                              icon:
+                                  const Icon(Icons.cancel, color: Colors.white),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red, // Background color
+                                padding: const EdgeInsets.symmetric(
+                                    vertical:
+                                        14), // More padding for larger buttons
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      10), // Rounded button corners
+                                ),
+                              ),
+                              label: const Text(
+                                'Cancel',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ), // Spacing between buttons
+                          10.pw,
+                          //order button
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                // Logic to place order
+                                showOrderTypeBottomSheet();
+                                Get.snackbar(
+                                  'Order Placed',
+                                  'Your order has been placed successfully.',
+                                  backgroundColor: Colors.green,
+                                  snackPosition: SnackPosition.TOP,
+                                  margin: const EdgeInsets.all(8.0),
+                                );
+                              },
+                              icon: const Icon(Icons.shopping_cart,
+                                  color: Colors.white),
+                              style: ElevatedButton.styleFrom(
                                 backgroundColor:
-                                    Colors.redAccent, // Alert color
-                                snackPosition: SnackPosition.TOP,
-                                margin: const EdgeInsets.all(8.0),
-                              );
-                            },
-                            icon: const Icon(Icons.cancel, color: Colors.white),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red, // Background color
-                              padding: const EdgeInsets.symmetric(
-                                  vertical:
-                                      14), // More padding for larger buttons
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    10), // Rounded button corners
+                                    Colors.green, // Background color
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14), // Larger buttons
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      10), // Rounded corners
+                                ),
                               ),
-                            ),
-                            label: const Text(
-                              'Cancel',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
+                              label: const Text(
+                                'Order',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
-                        ), // Spacing between buttons
-                        10.pw,
-                        //order button
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {
-                              // Logic to place order
-                              showOrderTypeBottomSheet();
-                              Get.snackbar(
-                                'Order Placed',
-                                'Your order has been placed successfully.',
-                                backgroundColor: Colors.green,
-                                snackPosition: SnackPosition.TOP,
-                                margin: const EdgeInsets.all(8.0),
-                              );
-                            },
-                            icon: const Icon(Icons.shopping_cart,
-                                color: Colors.white),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green, // Background color
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 14), // Larger buttons
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                                    10), // Rounded corners
-                              ),
-                            ),
-                            label: const Text(
-                              'Order',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          )
-        : const SizedBox.shrink();
+            )
+          : const SizedBox.shrink();
+    });
   }
 
   Widget _emptyCart(context) {
@@ -423,20 +427,22 @@ class CartPage extends StatelessWidget {
                             );
                           }).toList();
                           await orderService.createOrder(newOrder, orderMenus);
-
                           orderService.orders.refresh();
 
                           // Reset the form and cart after successful creation
                           formKey.currentState!.reset();
+                          cartController.clearCart();
                           cartController.selectedOrderType.value = null;
                           cartController.customerNameController.clear();
                           cartController.phoneController.clear();
-                          cartController.clearCart();
+                          Get.back();
+                          Get.offAndToNamed("/kitchen");
 
                           Get.snackbar(
                             'Order Placed',
                             'Your order has been placed successfully.',
                             backgroundColor: Colors.green,
+                            colorText: Colors.white,
                             snackPosition: SnackPosition.TOP,
                             margin: const EdgeInsets.all(8.0),
                           );

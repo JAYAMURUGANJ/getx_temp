@@ -20,6 +20,7 @@ final List<OrderStatus> orderStatusList = [
   OrderStatus(id: 1, name: "pending"),
   OrderStatus(id: 2, name: "cooking"),
   OrderStatus(id: 3, name: "ready to serve"),
-  OrderStatus(id: 4, name: "packed"),
+  OrderStatus(id: 4, name: "ready to take away"),
   OrderStatus(id: 5, name: "ready to deliver"),
+  OrderStatus(id: 6, name: "cancel"),
 ];
