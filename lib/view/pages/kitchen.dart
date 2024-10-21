@@ -1,6 +1,7 @@
 import 'package:cashcow/view/pages/order_details.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../../controllers/hive/order_controller.dart';
 import '../../model/order_type.dart';
 
@@ -39,12 +40,7 @@ class _KitchenPageState extends State<KitchenPage> {
       ),
       body: Obx(() {
         if (orderServiceController.orders.isEmpty) {
-          return const Center(
-            child: Text(
-              'No orders available.',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          );
+          return _emptyKitchen(context);
         }
 
         return ListView.builder(
@@ -109,5 +105,22 @@ class _KitchenPageState extends State<KitchenPage> {
         );
       }),
     );
+  }
+
+  Widget _emptyKitchen(context) {
+    return Center(
+        child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(
+          Icons.rice_bowl_outlined,
+          size: 100,
+        ),
+        Text(
+          'Your kitchen order is empty.',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+      ],
+    ));
   }
 }

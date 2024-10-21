@@ -26,7 +26,7 @@ class FoodMenu {
   String? country;
 
   @HiveField(7)
-  late int? quantity;
+  late int quantity;
 
   @HiveField(8)
   late bool? isPrepared;

@@ -10,15 +10,23 @@ class CartController extends GetxController {
   // Observable for total cart cost
   var totalCost = 0.0.obs;
 
-  // Observable for selected order type
-  var selectedOrderType = Rx<int?>(null);
+  var customerName = ''.obs;
+  var phoneNumber = ''.obs;
 
-  // To hold the selected table number for Dine In
-  var selectedTable = Rx<int?>(null);
+  // Observable for selected order type
+  var selectedOrderType = Rx<int>(1);
 
   // Controllers to hold customer name and phone number
   var customerNameController = TextEditingController();
   var phoneController = TextEditingController();
+
+  @override
+  void onInit() {
+    // Set initial values of the text fields to be synchronized with the observable variables
+    customerNameController.text = customerName.value;
+    phoneController.text = phoneNumber.value;
+    super.onInit();
+  }
 
   // Add item to the cart
   void addToCart(FoodMenu item) {
@@ -28,7 +36,7 @@ class CartController extends GetxController {
 
     if (existingItem != null) {
       // Increase quantity of existing item
-      existingItem.quantity = existingItem.quantity! + 1;
+      existingItem.quantity = existingItem.quantity + 1;
     } else {
       // Add new item with quantity of 1
       item.quantity = 1;
@@ -49,7 +57,7 @@ class CartController extends GetxController {
   void increaseQuantity(FoodMenu item) {
     int index = cartItems.indexOf(item);
     if (index != -1) {
-      cartItems[index].quantity = cartItems[index].quantity! + 1;
+      cartItems[index].quantity = cartItems[index].quantity + 1;
       cartItems.refresh(); // Trigger UI update
       calculateTotal();
     }
@@ -59,8 +67,8 @@ class CartController extends GetxController {
   void decreaseQuantity(FoodMenu item) {
     int index = cartItems.indexOf(item);
     if (index != -1) {
-      if ((cartItems[index].quantity ?? 1) > 1) {
-        cartItems[index].quantity = cartItems[index].quantity! - 1;
+      if ((cartItems[index].quantity) > 1) {
+        cartItems[index].quantity = cartItems[index].quantity - 1;
       } else {
         // Remove item if quantity reaches 1
         cartItems.removeAt(index);
@@ -73,23 +81,18 @@ class CartController extends GetxController {
   // Calculate the total price of all items in the cart
   void calculateTotal() {
     totalCost.value = cartItems.fold(0.0, (sum, item) {
-      return sum + (item.price ?? 0) * (item.quantity ?? 1);
+      return sum + (item.price ?? 0) * item.quantity;
     });
   }
 
   // Compute the total quantity of items in the cart
   int get totalQuantity {
-    return cartItems.fold(0, (sum, item) => sum + (item.quantity ?? 1));
+    return cartItems.fold(0, (sum, item) => sum + item.quantity);
   }
 
   // Select the order type and reset relevant fields
-  void selectOrderType(int? orderType) {
-    selectedOrderType.value = orderType;
-
-    // Clear table selection and customer details when switching order type
-    selectedTable.value = null;
-    customerNameController.clear();
-    phoneController.clear();
+  void selectOrderType(int orderTypeId) {
+    selectedOrderType.value = orderTypeId;
   }
 
   // Clear the cart
@@ -111,6 +114,18 @@ class CartController extends GetxController {
   bool validateCustomerName() {
     String name = customerNameController.text.trim();
     return name.isNotEmpty && name.length > 1; // Adjust as per business logic
+  }
+
+  // Update the controller text when values change
+  void updateCustomerDetails() {
+    customerNameController.text = customerName.value;
+    phoneController.text = phoneNumber.value;
+  }
+
+  // Clear form fields after submission (optional)
+  void clearFormFields() {
+    customerNameController.clear();
+    phoneController.clear();
   }
 
   // Perform a final check before submitting the order

@@ -12,7 +12,7 @@ class Order {
   final String? phoneNo;
 
   @HiveField(2)
-  final int? tableNo;
+  final int tableNo;
 
   @HiveField(3)
   final DateTime startDateTime;
@@ -35,7 +35,7 @@ class Order {
   Order({
     required this.orderTypeId,
     required this.phoneNo,
-    required this.tableNo,
+    this.tableNo = 1,
     required this.startDateTime,
     required this.endDateTime,
     required this.orderStatus,

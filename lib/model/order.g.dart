@@ -19,7 +19,7 @@ class OrderAdapter extends TypeAdapter<Order> {
     return Order(
       orderTypeId: fields[0] as int,
       phoneNo: fields[1] as String?,
-      tableNo: fields[2] as int?,
+      tableNo: fields[2] as int,
       startDateTime: fields[3] as DateTime,
       endDateTime: fields[4] as DateTime?,
       orderStatus: fields[5] as int?,

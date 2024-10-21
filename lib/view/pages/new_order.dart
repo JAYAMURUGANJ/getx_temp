@@ -172,7 +172,7 @@ class _NewOrderPageState extends State<NewOrderPage> {
     );
   }
 
-  NavigationRail _foodCategory(BuildContext context) {
+  Widget _foodCategory(BuildContext context) {
     return NavigationRail(
       leading: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -181,33 +181,38 @@ class _NewOrderPageState extends State<NewOrderPage> {
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
-      trailing: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5.0),
-        child: Obx(() {
-          // Ensure that orders is an observable
-          var ordersCount = orderServiceController
-              .orders.length; // Assuming orders is an observable list
+      trailing: Expanded(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5.0),
+            child: Obx(() {
+              // Ensure that orders is an observable
+              var ordersCount = orderServiceController
+                  .orders.length; // Assuming orders is an observable list
 
-          return IconButton(
-            icon: ordersCount != 0
-                ? Badge.count(
-                    textStyle: const TextStyle(fontSize: 18),
-                    count: ordersCount, // Display the total count of orders
-                    child: const Icon(
-                      Icons.rice_bowl_outlined,
-                      size: 50,
-                    ),
-                  )
-                : const Icon(
-                    Icons.rice_bowl_outlined,
-                    size: 50,
-                  ),
-            onPressed: () {
-              orderServiceController.orders.refresh();
-              Get.toNamed("/kitchen");
-            },
-          );
-        }),
+              return IconButton(
+                icon: ordersCount != 0
+                    ? Badge.count(
+                        textStyle: const TextStyle(fontSize: 18),
+                        count: ordersCount, // Display the total count of orders
+                        child: const Icon(
+                          Icons.rice_bowl_sharp,
+                          size: 40,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.rice_bowl_outlined,
+                        size: 40,
+                      ),
+                onPressed: () {
+                  orderServiceController.orders.refresh();
+                  Get.toNamed("/kitchen");
+                },
+              );
+            }),
+          ),
+        ),
       ),
       selectedIndex: selectedCategoryIndex,
       onDestinationSelected: (int index) {
