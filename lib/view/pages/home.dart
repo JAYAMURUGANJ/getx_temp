@@ -16,18 +16,19 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final CartController cartController = Get.find();
-  late TabController tabController;
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     // Initialize the TabController
-    tabController = TabController(length: 3, vsync: this); // Assuming 3 tabs
+    _tabController =
+        TabController(length: tabs.length, vsync: this); // Assuming 3 tabs
   }
 
   @override
   void dispose() {
-    tabController.dispose(); // Dispose the controller to avoid memory leaks
+    _tabController.dispose(); // Dispose the controller to avoid memory leaks
     super.dispose();
   }
 
@@ -36,18 +37,24 @@ class _HomePageState extends State<HomePage>
     return DefaultTabController(
       length: tabs.length, // Number of tabs
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: const Text('Cashcow'),
           bottom: TabBar(
+            controller: _tabController,
             tabs: tabs,
           ),
           actions: [
             KCartIcon(cartController: cartController),
           ],
         ),
-        body: TabBarView(
-          children: pages,
-        ),
+        body: TabBarView(controller: _tabController, children: [
+          NewOrderPage(
+            tabController: _tabController,
+          ),
+          const KitchenPage(),
+          const PaymentPage(),
+        ]),
       ),
     );
   }
@@ -66,12 +73,6 @@ List<Widget> tabs = [
     icon: Icon(Icons.payments_sharp),
     text: 'Payment',
   ),
-];
-
-List<Widget> pages = [
-  const NewOrderPage(),
-  const KitchenPage(),
-  const PaymentPage(),
 ];
 
 // Payment Page

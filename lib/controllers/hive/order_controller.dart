@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:hive/hive.dart';
+
 import '../../../model/order.dart';
 import '../../model/order_menus.dart';
 
@@ -66,6 +67,13 @@ class OrderServiceController extends GetxController {
     return orderMenus
         .where((menu) => menu.orderTrackId == orderTrackId)
         .toList();
+  }
+
+  Future<List<dynamic>> getOrders(int page, int pageSize) async {
+    // Retrieve orders from your storage (e.g., Hive) and apply pagination
+    List<dynamic> allOrders =
+        getAllOrdersList(); // Your method to get all orders
+    return allOrders.skip((page - 1) * pageSize).take(pageSize).toList();
   }
 
   // Get order details including order and corresponding menus

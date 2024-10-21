@@ -9,7 +9,8 @@ import '../../controllers/hive/order_controller.dart';
 import '../../utils/widgets/catch_network_img.dart';
 
 class NewOrderPage extends StatefulWidget {
-  const NewOrderPage({super.key});
+  final TabController? tabController;
+  const NewOrderPage({super.key, this.tabController});
 
   @override
   _NewOrderPageState createState() => _NewOrderPageState();
@@ -206,8 +207,15 @@ class _NewOrderPageState extends State<NewOrderPage> {
                         size: 40,
                       ),
                 onPressed: () {
-                  orderServiceController.orders.refresh();
-                  Get.toNamed("/kitchen");
+                  // orderServiceController.orders.refresh();
+                  //Navigate to the kitchen tab
+                  if (widget.tabController != null) {
+                    debugPrint('TabController is not null');
+                    widget.tabController!
+                        .animateTo(1); // Switch to the kitchen tab
+                  } else {
+                    Get.toNamed("/kitchen");
+                  }
                 },
               );
             }),
