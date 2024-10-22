@@ -43,10 +43,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
               children: [
                 // Scrollable NavigationRail for categories
                 _foodCategory(context),
-
                 // Divider between navigation and content
                 const VerticalDivider(thickness: 1, width: 1),
-
                 // Food Menu List for the selected category
                 Expanded(
                   child: Obx(() {

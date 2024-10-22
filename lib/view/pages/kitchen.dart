@@ -1,11 +1,11 @@
 import 'package:cashcow/utils/extension/sizedbox.dart';
-import 'package:cashcow/view/pages/order_details.dart';
+import 'package:cashcow/view/widgets/order_details_props.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 import '../../controllers/hive/order_controller.dart';
 import '../../model/order_type.dart';
+import 'order_details.dart';
 
 class KitchenPage extends StatefulWidget {
   const KitchenPage({super.key});
@@ -119,7 +119,6 @@ class _KitchenPageState extends State<KitchenPage> {
               borderRadius: BorderRadius.circular(10),
               border:
                   Border.all(color: Colors.grey), // Adjust the color as needed
-              color: Colors.white, // Background color
             ),
             child: Padding(
               padding: const EdgeInsets.all(3.0),
@@ -178,75 +177,12 @@ class _KitchenPageState extends State<KitchenPage> {
           itemCount: orders.length,
           itemBuilder: (context, index1) {
             final order = orders[index1];
-
-            // Format the time part of the order
-            String formattedDate = DateFormat('MMMM dd, yyyy, hh:mm a')
-                .format(order.startDateTime);
-
-            return Card(
-              margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-              elevation: 3,
-              child: ListTile(
-                leading: Container(
-                  width: 60,
-                  height: 50,
-                  color: order.orderTypeId == 1 ? Colors.green : Colors.orange,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Center(
-                      child: Text(
-                        orderType[order.orderTypeId - 1].name!.toUpperCase(),
-                        maxLines: 2,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                title: Text(
-                  "Order Id: ${order.orderTrackId}",
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      formattedDate, // Display the time only
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    const Text(
-                      "Tap to view more",
-                      style: TextStyle(fontSize: 12),
-                    ),
-                  ],
-                ),
-                trailing: order.orderStatus == 1
-                    ? const Icon(
-                        Icons.linear_scale_outlined,
-                        size: 40,
-                        color: Colors.amber,
-                      )
-                    : order.orderStatus == 6
-                        ? const Icon(
-                            Icons.close,
-                            size: 40,
-                            color: Colors.greenAccent,
-                          )
-                        : const Icon(
-                            Icons.check_sharp,
-                            size: 40,
-                            color: Colors.greenAccent,
-                          ),
-                onTap: () {
-                  // Navigate to the OrderDetailsPage with the order data
-                  Get.to(() => OrderDetailsPage(order: order));
-                },
-              ),
-            );
+            return GestureDetector(
+                onTap: () => Get.to(() => OrderDetailsPage(order: order)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: OrderDetailsCard(order: order),
+                ));
           },
         ),
       ],

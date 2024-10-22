@@ -16,11 +16,10 @@ class OrderStatus {
   });
 }
 
-final List<OrderStatus> orderStatusList = [
-  OrderStatus(id: 1, name: "pending"),
-  OrderStatus(id: 2, name: "cooking"),
-  OrderStatus(id: 3, name: "ready to serve"),
-  OrderStatus(id: 4, name: "ready to take away"),
-  OrderStatus(id: 5, name: "ready to deliver"),
-  OrderStatus(id: 6, name: "cancel"),
+final List<OrderStatus> getOrderStatusList = [
+  OrderStatus(id: 1, name: "CONFIRMED"),
+  OrderStatus(id: 2, name: "COOKING"),
+  OrderStatus(id: 3, name: "COMPLETED"),
+  OrderStatus(id: 4, name: "CANCELLED"),
+  OrderStatus(id: 5, name: "HOLDING"),
 ];

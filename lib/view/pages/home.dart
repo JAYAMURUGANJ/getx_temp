@@ -43,6 +43,7 @@ class _HomePageState extends State<HomePage>
           bottom: TabBar(
             controller: _tabController,
             tabs: tabs,
+            indicatorSize: TabBarIndicatorSize.tab,
           ),
           actions: [
             KCartIcon(cartController: cartController),

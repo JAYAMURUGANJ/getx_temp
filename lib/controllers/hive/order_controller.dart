@@ -55,7 +55,7 @@ class OrderServiceController extends GetxController {
       }
 
       debugPrint(
-          'Order created: ${newOrder.orderStatus}, Track ID: $orderTrackId');
+          'Order created: ${newOrder.orderStatusId}, Track ID: $orderTrackId');
     } catch (e) {
       debugPrint('Error creating order: $e');
       rethrow; // Optional: rethrow to handle it higher up

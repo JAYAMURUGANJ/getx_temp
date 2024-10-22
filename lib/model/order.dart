@@ -21,10 +21,10 @@ class Order {
   DateTime? endDateTime;
 
   @HiveField(5)
-  int? orderStatus;
+  int orderStatusId;
 
   @HiveField(6)
-  int? payementStatus;
+  int payementStatusId;
 
   @HiveField(7)
   final String? customerName;
@@ -32,16 +32,20 @@ class Order {
   @HiveField(8)
   final String? orderTrackId;
 
+  @HiveField(9)
+  int paymentTypeId;
+
   Order({
     required this.orderTypeId,
     required this.phoneNo,
     this.tableNo = 1,
     required this.startDateTime,
     required this.endDateTime,
-    required this.orderStatus,
-    required this.payementStatus,
+    this.orderStatusId = 1,
+    this.payementStatusId = 1,
     required this.customerName,
     required this.orderTrackId,
+    this.paymentTypeId = 1,
   });
 
   // copyWith method for creating a modified instance of Order
@@ -51,10 +55,11 @@ class Order {
     int? tableNo,
     DateTime? startDateTime,
     DateTime? endDateTime,
-    int? orderStatus,
-    int? payementStatus,
+    int? orderStatusId,
+    int? payementStatusId,
     String? customerName,
     String? orderTrackId,
+    int? paymentTypeId,
   }) {
     return Order(
       orderTypeId: orderTypeId ?? this.orderTypeId,
@@ -62,10 +67,11 @@ class Order {
       tableNo: tableNo ?? this.tableNo,
       startDateTime: startDateTime ?? this.startDateTime,
       endDateTime: endDateTime ?? this.endDateTime,
-      orderStatus: orderStatus ?? this.orderStatus,
-      payementStatus: payementStatus ?? this.payementStatus,
+      orderStatusId: orderStatusId ?? this.orderStatusId,
+      payementStatusId: payementStatusId ?? this.payementStatusId,
       customerName: customerName ?? this.customerName,
       orderTrackId: orderTrackId ?? this.orderTrackId,
+      paymentTypeId: paymentTypeId ?? this.paymentTypeId,
     );
   }
 }

@@ -25,7 +25,7 @@ class OrderMenusAdapter extends TypeAdapter<OrderMenus> {
       rate: fields[5] as int?,
       country: fields[6] as String?,
       quantity: fields[7] as int?,
-      isPrepared: fields[8] as bool?,
+      isPrepared: fields[8] as bool,
       orderTrackId: fields[10] as String?,
     );
   }

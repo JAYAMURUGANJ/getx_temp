@@ -29,7 +29,7 @@ class OrderMenus {
   late int? quantity;
 
   @HiveField(8)
-  late bool? isPrepared;
+  late bool isPrepared;
 
   @HiveField(10)
   String? orderTrackId;

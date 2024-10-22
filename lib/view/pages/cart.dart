@@ -7,9 +7,7 @@ import 'package:get/get.dart';
 import '../../controllers/cart_controller.dart';
 import '../../controllers/hive/order_controller.dart';
 import '../../model/order_menus.dart';
-import '../../model/order_status.dart';
 import '../../model/order_type.dart';
-import '../../model/payement_type.dart';
 import '../../utils/widgets/catch_network_img.dart';
 
 class CartPage extends StatelessWidget {
@@ -162,11 +160,8 @@ class CartPage extends StatelessWidget {
                                                 .phoneController.text
                                             : null,
                                         startDateTime: DateTime.now(),
-                                        orderStatus: orderStatusList[0]
-                                            .id, // Default status
                                         endDateTime:
-                                            null, // End time will be updated when the order is completed
-                                        payementStatus: getPaymentTypes[0].id,
+                                            null, // End time will be updated when t
                                       );
                                       List<OrderMenus> orderMenus =
                                           cartController.cartItems
@@ -180,7 +175,7 @@ class CartPage extends StatelessWidget {
                                           rate: foodMenu.rate,
                                           country: foodMenu.country,
                                           quantity: foodMenu.quantity,
-                                          isPrepared: foodMenu.isPrepared,
+                                          // isPrepared: foodMenu.isPrepared,
                                           orderTrackId:
                                               orderTrackId, // Set the same orderTrackId
                                         );
@@ -386,10 +381,9 @@ class CartPage extends StatelessWidget {
                                   color: Colors.grey[
                                       600]), // Consistent small text styling
                         ),
-                        const SizedBox(
-                            width: 4), // Small spacing between elements
-                        const Text('X'),
-                        const SizedBox(width: 4),
+                        4.pw,
+                        const Text('x'),
+                        4.pw,
                         Text(
                           '${item.price} )',
                           style: Theme.of(context)
@@ -444,7 +438,7 @@ class CartPage extends StatelessWidget {
                       //item total amount
                       Flexible(
                         child: Text(
-                          '\$${(item.price! * item.quantity).toStringAsFixed(2)}',
+                          '\$ ${(item.price! * item.quantity).toStringAsFixed(2)}',
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.bold, // Bolder price
