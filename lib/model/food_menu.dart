@@ -29,18 +29,19 @@ class FoodMenu {
   late int quantity;
 
   @HiveField(8)
-  late bool? isPrepared;
+  late int isPrepared;
 
-  FoodMenu(
-      {this.id,
-      this.img,
-      this.name,
-      this.dsc,
-      this.price,
-      this.rate,
-      this.country,
-      this.quantity = 1,
-      this.isPrepared = false});
+  FoodMenu({
+    this.id,
+    this.img,
+    this.name,
+    this.dsc,
+    this.price,
+    this.rate,
+    this.country,
+    this.quantity = 1,
+    this.isPrepared = 1,
+  });
 
   // Optional: JSON serialization/deserialization
   FoodMenu.fromJson(Map<String, dynamic> json) {
@@ -52,7 +53,7 @@ class FoodMenu {
     rate = json['rate'];
     country = json['country'];
     quantity = 1;
-    isPrepared = false;
+    isPrepared = 1;
   }
 
   Map<String, dynamic> toJson() {
@@ -78,7 +79,7 @@ class FoodMenu {
     int? rate,
     String? country,
     int? quantity,
-    bool? isPrepared,
+    int? isPrepared,
   }) {
     return FoodMenu(
       id: id ?? this.id,

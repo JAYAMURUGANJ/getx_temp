@@ -29,7 +29,7 @@ class OrderMenus {
   late int? quantity;
 
   @HiveField(8)
-  late bool isPrepared;
+  late int isPrepared;
 
   @HiveField(10)
   String? orderTrackId;
@@ -43,7 +43,7 @@ class OrderMenus {
     this.rate,
     this.country,
     this.quantity = 1,
-    this.isPrepared = false,
+    this.isPrepared = 1,
     this.orderTrackId,
   });
 
@@ -57,7 +57,7 @@ class OrderMenus {
     rate = json['rate'];
     country = json['country'];
     quantity = 1;
-    isPrepared = false;
+    isPrepared = 1;
     orderTrackId = "";
   }
 
@@ -86,7 +86,7 @@ class OrderMenus {
     int? rate,
     String? country,
     int? quantity,
-    bool? isPrepared,
+    int? isPrepared,
     String? orderTrackId,
   }) {
     return OrderMenus(

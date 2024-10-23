@@ -25,7 +25,7 @@ class FoodMenuAdapter extends TypeAdapter<FoodMenu> {
       rate: fields[5] as int?,
       country: fields[6] as String?,
       quantity: fields[7] as int,
-      isPrepared: fields[8] as bool?,
+      isPrepared: fields[8] as int,
     );
   }
 

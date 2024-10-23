@@ -48,6 +48,22 @@ class Order {
     this.paymentTypeId = 1,
   });
 
+  // Factory constructor for creating an empty Order object
+  factory Order.empty() {
+    return Order(
+      orderTypeId: 0, // or any default value you see fit
+      phoneNo: null,
+      tableNo: 1,
+      startDateTime: DateTime.now(), // or any default value you see fit
+      endDateTime: null,
+      orderStatusId: 1,
+      payementStatusId: 1,
+      customerName: null,
+      orderTrackId: null,
+      paymentTypeId: 1,
+    );
+  }
+
   // copyWith method for creating a modified instance of Order
   Order copyWith({
     int? orderTypeId,

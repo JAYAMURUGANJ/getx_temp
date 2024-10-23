@@ -16,8 +16,9 @@ class OrderDetailsCard extends StatefulWidget {
 class _OrderDetailsCardState extends State<OrderDetailsCard> {
   @override
   Widget build(BuildContext context) {
+    Order orderDetails = widget.order;
     String formattedDate =
-        DateFormat('MMMM dd, yyyy, hh:mm a').format(widget.order.startDateTime);
+        DateFormat('MMMM dd, yyyy, hh:mm a').format(orderDetails.startDateTime);
     return Card(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -31,13 +32,14 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
             child: Container(
               width: 60,
               height: 100,
-              color:
-                  widget.order.orderTypeId == 1 ? Colors.green : Colors.orange,
+              color: orderDetails.orderTypeId == 1
+                  ? Colors.deepPurple
+                  : Colors.pink,
               child: Padding(
                 padding: const EdgeInsets.all(4.0),
                 child: Center(
                   child: Text(
-                    orderType[widget.order.orderTypeId - 1].name!.toUpperCase(),
+                    orderType[orderDetails.orderTypeId - 1].name!.toUpperCase(),
                     maxLines: 2,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
@@ -59,7 +61,7 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "#${widget.order.orderTrackId}",
+                    "#${orderDetails.orderTrackId}",
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context)
                         .textTheme
@@ -67,12 +69,16 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
                         .copyWith(decoration: TextDecoration.underline),
                   ),
                   Text(
-                    "${widget.order.customerName}",
+                    orderDetails.customerName == "Null"
+                        ? "${orderDetails.customerName}"
+                        : "CUSTOMER",
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    "${widget.order.phoneNo}",
+                    orderDetails.phoneNo == "Null"
+                        ? "${orderDetails.phoneNo}"
+                        : "PHONE NUMBER",
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   //Date Time
@@ -85,7 +91,7 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
             ),
           ),
           //Payment and Order status
-          OrderStatusIndicator(orderStatusId: widget.order.orderStatusId)
+          OrderStatusIndicator(orderStatusId: orderDetails.orderStatusId)
         ],
       ),
     );
@@ -107,16 +113,16 @@ class _OrderStatusIndicatorState extends State<OrderStatusIndicator> {
     String statusText =
         getOrderStatusList.firstWhere((data) => data.id == id).name.toString();
     Color color = id == 1
-        ? Colors.amber
+        ? Colors.lightBlue
         : id == 2
-            ? Colors.orangeAccent
+            ? Colors.deepOrange
             : id == 3
-                ? Colors.greenAccent
+                ? Colors.lightGreen
                 : id == 4
-                    ? Colors.redAccent
+                    ? Colors.red
                     : id == 5
-                        ? Colors.blueAccent
-                        : Colors.amber;
+                        ? Colors.pink
+                        : Colors.lightBlue;
     return Padding(
       padding: const EdgeInsets.all(3.0),
       child: Container(
@@ -137,6 +143,147 @@ class _OrderStatusIndicatorState extends State<OrderStatusIndicator> {
                 .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class StatusIcon extends StatefulWidget {
+  final int status;
+
+  const StatusIcon({super.key, required this.status});
+
+  @override
+  State<StatusIcon> createState() => _StatusIconState();
+}
+
+class _StatusIconState extends State<StatusIcon> {
+  bool reverse = false; // Track color direction for case 2 animation
+
+  @override
+  Widget build(BuildContext context) {
+    switch (widget.status) {
+      case 1:
+        // Case 1: Show disabled icon
+        return const Icon(
+          Icons.local_fire_department_outlined,
+          color: Colors.grey, // Disabled color
+        );
+
+      case 2:
+        // Case 2: Show animated icon with color change
+        return TweenAnimationBuilder<Color?>(
+          tween: ColorTween(
+            begin: reverse ? Colors.orange : Colors.red,
+            end: reverse ? Colors.red : Colors.orange,
+          ),
+          duration: const Duration(seconds: 1),
+          onEnd: () {
+            // Reverse the color direction to loop the animation
+            setState(() {
+              reverse = !reverse;
+            });
+          },
+          builder: (BuildContext context, Color? color, Widget? child) {
+            return Icon(
+              Icons.local_fire_department,
+              color: color ?? Colors.red, // Animated color
+            );
+          },
+        );
+
+      case 3:
+        // Case 3: Show static green icon
+        return const Icon(
+          Icons.local_fire_department,
+          color: Colors.green,
+        );
+
+      default:
+        return const Icon(
+          Icons.local_fire_department_outlined,
+          color: Colors.grey, // Default case for invalid status
+        );
+    }
+  }
+}
+
+class OrderStatusDropdown extends StatefulWidget {
+  final int initialStatus;
+  final Function(int) onStatusChange;
+
+  const OrderStatusDropdown(
+      {super.key, required this.initialStatus, required this.onStatusChange});
+
+  @override
+  _OrderStatusDropdownState createState() => _OrderStatusDropdownState();
+}
+
+class _OrderStatusDropdownState extends State<OrderStatusDropdown> {
+  late int selectedStatus;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedStatus = widget.initialStatus;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start, // Align text to the start
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Choose the Order Status",
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold, // Bold text
+                    color: Colors.black87, // Custom color
+                  ),
+            ),
+          ),
+          const SizedBox(
+              height: 10), // Adjusted spacing instead of using `10.ph`
+          Container(
+            width: double.infinity, // Full width of the screen
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10), // Rounded corners
+              border: Border.all(color: Colors.grey), // Grey border
+              color: Colors.white, // Background color for dropdown
+            ),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12.0), // Inner padding
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                isExpanded: true, // Ensures dropdown takes the full width
+                value: selectedStatus,
+                items: getOrderStatusList.map((OrderStatus status) {
+                  return DropdownMenuItem<int>(
+                    value: status.id,
+                    child: Text(
+                      status.name.toString(),
+                      style: const TextStyle(
+                        fontSize: 16, // Customize the font size
+                        fontWeight: FontWeight.w500, // Medium weight
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedStatus = value!;
+                  });
+                  widget.onStatusChange(selectedStatus); // Update the status
+                },
+                icon: const Icon(Icons.arrow_drop_down), // Dropdown arrow icon
+                iconSize: 24, // Customize the icon size
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

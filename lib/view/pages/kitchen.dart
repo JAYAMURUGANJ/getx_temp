@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/hive/order_controller.dart';
+import '../../model/order.dart';
 import '../../model/order_type.dart';
 import 'order_details.dart';
 
@@ -20,49 +21,59 @@ class _KitchenPageState extends State<KitchenPage> {
   // TextEditingController for search
   final TextEditingController searchController = TextEditingController();
 
-  String selectedOrderType = 'All'; // Default filter option
-  List<dynamic> filteredOrders = []; // List to store filtered orders
+  // Observable variables for GetX
+  final RxString selectedOrderType = 'All'.obs; // Default filter option
+  final RxList<Order> allOrders =
+      <Order>[].obs; // Observable list of all orders
+  final RxList<Order> filteredOrders =
+      <Order>[].obs; // Observable list for filtered orders
 
   @override
   void initState() {
     super.initState();
-    // Ensure the box is opened only once during initialization
-    _loadOrders();
+    loadOrders(); // Load orders on initialization
   }
 
-  Future<void> _loadOrders() async {
+  // Load orders and filter them
+  void loadOrders() async {
     await orderServiceController.openBox(); // Wait until the box is opened
-    _filterOrders(); // Apply initial filter to show all orders
+    allOrders.assignAll(
+        orderServiceController.getAllOrdersList()); // Populate all orders
+    filterOrders(); // Apply initial filter to show all orders
+
+    // Watch for changes in orders and re-filter when they change
+    ever(orderServiceController.orders, (_) {
+      allOrders.assignAll(orderServiceController.getAllOrdersList());
+      filterOrders();
+    });
   }
 
   // Function to filter orders based on search and filter criteria
-  void _filterOrders() {
-    final orders = orderServiceController.getAllOrdersList();
+  void filterOrders() {
+    filteredOrders.value = allOrders.where((order) {
+      // Filter by search
+      bool matchesSearch = searchController.text.isEmpty ||
+          order.orderTrackId.toString().contains(searchController.text);
 
-    setState(() {
-      filteredOrders = orders.where((order) {
-        // Filter by search
-        bool matchesSearch = searchController.text.isEmpty ||
-            order.orderTrackId.toString().contains(searchController.text);
+      // Filter by order type
+      bool matchesFilter = selectedOrderType.value == 'All' ||
+          order.orderTypeId ==
+              orderType
+                  .firstWhere(
+                    (type) => type.name == selectedOrderType.value,
+                    orElse: () => OrderType(id: 0, name: ''),
+                  )
+                  .id;
 
-        // Filter by order type
-        bool matchesFilter = selectedOrderType == 'All' ||
-            order.orderTypeId ==
-                orderType
-                    .firstWhere((type) => type.name == selectedOrderType,
-                        orElse: () => OrderType(id: 0, name: ''))
-                    .id;
-
-        return matchesSearch && matchesFilter;
-      }).toList();
-    });
+      return matchesSearch && matchesFilter;
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
-        if (orderServiceController.orders.isEmpty) {
+        if (filteredOrders.isEmpty) {
           return _emptyKitchen(context);
         }
 
@@ -70,18 +81,20 @@ class _KitchenPageState extends State<KitchenPage> {
           children: [
             _buildSearchAndFilter(),
             Expanded(
-              child: ListView(
-                children: [
-                  if (filteredOrders.isNotEmpty)
-                    _buildOrderSection("Orders", filteredOrders)
-                  else
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Text("No orders found"),
-                      ),
+              child: ListView.builder(
+                itemCount: filteredOrders.length,
+                itemBuilder: (context, index) {
+                  final order = filteredOrders[index];
+                  return GestureDetector(
+                    onTap: () => Get.to(() => OrderDetailsPage(
+                          orderTrackId: order.orderTrackId.toString(),
+                        )),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: OrderDetailsCard(order: order),
                     ),
-                ],
+                  );
+                },
               ),
             ),
           ],
@@ -108,7 +121,7 @@ class _KitchenPageState extends State<KitchenPage> {
                 prefixIcon: const Icon(Icons.search),
               ),
               onChanged: (value) {
-                _filterOrders(); // Trigger filtering when search changes
+                filterOrders(); // Trigger filtering when search changes
               },
             ),
           ),
@@ -117,75 +130,40 @@ class _KitchenPageState extends State<KitchenPage> {
             width: 130,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              border:
-                  Border.all(color: Colors.grey), // Adjust the color as needed
+              border: Border.all(color: Colors.grey),
             ),
             child: Padding(
               padding: const EdgeInsets.all(3.0),
               child: DropdownButtonHideUnderline(
-                // Hides the default underline
-                child: DropdownButton<String>(
-                  value: selectedOrderType,
-                  items: <String>['All', ...orderType.map((type) => type.name!)]
-                      .map((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Padding(
-                        // Adds padding around the text
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text(value),
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedOrderType = value!;
-                      _filterOrders(); // Trigger filtering when filter changes
-                    });
-                  },
-                  isExpanded:
-                      true, // Makes the dropdown take the full width of the container
-                  icon: const Icon(
-                      Icons.arrow_drop_down), // Customize the dropdown icon
-                ),
+                child: Obx(() {
+                  return DropdownButton<String>(
+                    value: selectedOrderType.value,
+                    items: <String>[
+                      'All',
+                      ...orderType.map((type) => type.name!)
+                    ].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Text(value),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      selectedOrderType.value =
+                          value!; // Update selected order type
+                      filterOrders(); // Trigger filtering when filter changes
+                    },
+                    isExpanded: true,
+                    icon: const Icon(Icons.arrow_drop_down),
+                  );
+                }),
               ),
             ),
-          )
+          ),
         ],
       ),
-    );
-  }
-
-  // Helper function to build each order section
-  Widget _buildOrderSection(String title, List orders) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            title,
-            style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueGrey),
-          ),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: orders.length,
-          itemBuilder: (context, index1) {
-            final order = orders[index1];
-            return GestureDetector(
-                onTap: () => Get.to(() => OrderDetailsPage(order: order)),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: OrderDetailsCard(order: order),
-                ));
-          },
-        ),
-      ],
     );
   }
 

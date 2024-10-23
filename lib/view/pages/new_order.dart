@@ -8,32 +8,26 @@ import '../../controllers/food_menu_controller.dart';
 import '../../controllers/hive/order_controller.dart';
 import '../../utils/widgets/catch_network_img.dart';
 
-class NewOrderPage extends StatefulWidget {
+class NewOrderPage extends StatelessWidget {
   final TabController? tabController;
   const NewOrderPage({super.key, this.tabController});
 
   @override
-  _NewOrderPageState createState() => _NewOrderPageState();
-}
+  Widget build(BuildContext context) {
+    final FoodMenuController foodMenuController = Get.find();
+    final OrderServiceController orderServiceController = Get.find();
+    final CartController cartController = Get.find();
 
-class _NewOrderPageState extends State<NewOrderPage> {
-  int selectedCategoryIndex = 0;
-  final FoodMenuController foodMenuController = Get.find();
-  final OrderServiceController orderServiceController = Get.find();
-  final CartController cartController = Get.find();
-  String searchQuery = '';
+    // Observable variables for GetX
+    var selectedCategoryIndex = 0.obs; // Use RxInt for reactive state
+    var searchQuery = ''.obs; // Use RxString for the search query
 
-  @override
-  void initState() {
-    super.initState();
     // Load menu items based on initial category selection
-    foodMenuController.loadMenuFromCategory(categories[selectedCategoryIndex]);
+    foodMenuController
+        .loadMenuFromCategory(categories[selectedCategoryIndex.value]);
     // Open the Hive box when the widget is created
     orderServiceController.openBox();
-  }
 
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
@@ -42,7 +36,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
             child: Row(
               children: [
                 // Scrollable NavigationRail for categories
-                _foodCategory(context),
+                _foodCategory(context, selectedCategoryIndex,
+                    foodMenuController, orderServiceController),
                 // Divider between navigation and content
                 const VerticalDivider(thickness: 1, width: 1),
                 // Food Menu List for the selected category
@@ -50,7 +45,9 @@ class _NewOrderPageState extends State<NewOrderPage> {
                   child: Obx(() {
                     var filteredMenu = foodMenuController.foodMenuList
                         .where((item) =>
-                            item.name?.toLowerCase().contains(searchQuery) ??
+                            item.name
+                                ?.toLowerCase()
+                                .contains(searchQuery.value) ??
                             true)
                         .toList();
 
@@ -64,10 +61,8 @@ class _NewOrderPageState extends State<NewOrderPage> {
                           padding: const EdgeInsets.all(8.0),
                           child: TextField(
                             onChanged: (value) {
-                              setState(() {
-                                searchQuery = value
-                                    .toLowerCase(); // Update the search query
-                              });
+                              searchQuery.value = value
+                                  .toLowerCase(); // Update the search query
                             },
                             decoration: InputDecoration(
                               labelText: 'Search Menu',
@@ -171,7 +166,11 @@ class _NewOrderPageState extends State<NewOrderPage> {
     );
   }
 
-  Widget _foodCategory(BuildContext context) {
+  Widget _foodCategory(
+      BuildContext context,
+      RxInt selectedCategoryIndex,
+      FoodMenuController foodMenuController,
+      OrderServiceController orderServiceController) {
     return NavigationRail(
       leading: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -205,12 +204,10 @@ class _NewOrderPageState extends State<NewOrderPage> {
                         size: 40,
                       ),
                 onPressed: () {
-                  // orderServiceController.orders.refresh();
-                  //Navigate to the kitchen tab
-                  if (widget.tabController != null) {
+                  // Navigate to the kitchen tab
+                  if (tabController != null) {
                     debugPrint('TabController is not null');
-                    widget.tabController!
-                        .animateTo(1); // Switch to the kitchen tab
+                    tabController!.animateTo(1); // Switch to the kitchen tab
                   } else {
                     Get.toNamed("/kitchen");
                   }
@@ -220,11 +217,10 @@ class _NewOrderPageState extends State<NewOrderPage> {
           ),
         ),
       ),
-      selectedIndex: selectedCategoryIndex,
+      selectedIndex: selectedCategoryIndex.value,
       onDestinationSelected: (int index) {
-        setState(() {
-          selectedCategoryIndex = index;
-        });
+        selectedCategoryIndex.value =
+            index; // Update the selected category index
         // Load menu based on selected category
         foodMenuController.loadMenuFromCategory(categories[index]);
       },
