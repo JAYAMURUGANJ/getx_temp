@@ -8,7 +8,7 @@ part of 'order.dart';
 
 class OrderAdapter extends TypeAdapter<Order> {
   @override
-  final int typeId = 5;
+  final int typeId = 9;
 
   @override
   Order read(BinaryReader reader) {
@@ -19,40 +19,37 @@ class OrderAdapter extends TypeAdapter<Order> {
     return Order(
       orderTypeId: fields[0] as int,
       phoneNo: fields[1] as String?,
-      tableNo: fields[2] as int,
-      startDateTime: fields[3] as DateTime,
-      endDateTime: fields[4] as DateTime?,
-      orderStatusId: fields[5] as int,
-      payementStatusId: fields[6] as int,
-      customerName: fields[7] as String?,
-      orderTrackId: fields[8] as String?,
-      paymentTypeId: fields[9] as int,
+      startDateTime: fields[2] as DateTime,
+      endDateTime: fields[3] as DateTime?,
+      orderStatusId: fields[4] as int,
+      payementStatusId: fields[5] as int,
+      customerName: fields[6] as String?,
+      orderTrackId: fields[7] as String?,
+      paymentTypeId: fields[8] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Order obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.orderTypeId)
       ..writeByte(1)
       ..write(obj.phoneNo)
       ..writeByte(2)
-      ..write(obj.tableNo)
-      ..writeByte(3)
       ..write(obj.startDateTime)
-      ..writeByte(4)
+      ..writeByte(3)
       ..write(obj.endDateTime)
-      ..writeByte(5)
+      ..writeByte(4)
       ..write(obj.orderStatusId)
-      ..writeByte(6)
+      ..writeByte(5)
       ..write(obj.payementStatusId)
-      ..writeByte(7)
+      ..writeByte(6)
       ..write(obj.customerName)
-      ..writeByte(8)
+      ..writeByte(7)
       ..write(obj.orderTrackId)
-      ..writeByte(9)
+      ..writeByte(8)
       ..write(obj.paymentTypeId);
   }
 

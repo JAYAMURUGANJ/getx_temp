@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 
 part 'order.g.dart';
 
-@HiveType(typeId: 5) // Ensure typeId is unique
+@HiveType(typeId: 9) // Ensure typeId is unique
 class Order {
   @HiveField(0)
   final int orderTypeId;
@@ -12,33 +12,29 @@ class Order {
   final String? phoneNo;
 
   @HiveField(2)
-  final int tableNo;
-
-  @HiveField(3)
   final DateTime startDateTime;
 
-  @HiveField(4)
+  @HiveField(3)
   DateTime? endDateTime;
 
-  @HiveField(5)
+  @HiveField(4)
   int orderStatusId;
 
-  @HiveField(6)
+  @HiveField(5)
   int payementStatusId;
 
-  @HiveField(7)
+  @HiveField(6)
   final String? customerName;
 
-  @HiveField(8)
+  @HiveField(7)
   final String? orderTrackId;
 
-  @HiveField(9)
+  @HiveField(8)
   int paymentTypeId;
 
   Order({
     required this.orderTypeId,
     required this.phoneNo,
-    this.tableNo = 1,
     required this.startDateTime,
     required this.endDateTime,
     this.orderStatusId = 1,
@@ -53,7 +49,6 @@ class Order {
     return Order(
       orderTypeId: 0, // or any default value you see fit
       phoneNo: null,
-      tableNo: 1,
       startDateTime: DateTime.now(), // or any default value you see fit
       endDateTime: null,
       orderStatusId: 1,
@@ -68,7 +63,6 @@ class Order {
   Order copyWith({
     int? orderTypeId,
     String? phoneNo,
-    int? tableNo,
     DateTime? startDateTime,
     DateTime? endDateTime,
     int? orderStatusId,
@@ -80,7 +74,6 @@ class Order {
     return Order(
       orderTypeId: orderTypeId ?? this.orderTypeId,
       phoneNo: phoneNo ?? this.phoneNo,
-      tableNo: tableNo ?? this.tableNo,
       startDateTime: startDateTime ?? this.startDateTime,
       endDateTime: endDateTime ?? this.endDateTime,
       orderStatusId: orderStatusId ?? this.orderStatusId,
