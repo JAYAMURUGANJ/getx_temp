@@ -22,7 +22,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/
+    - assets/images/logo/
+    - assets/images/photo/
     - assets/data/food_menu/
     - assets/icons/
   

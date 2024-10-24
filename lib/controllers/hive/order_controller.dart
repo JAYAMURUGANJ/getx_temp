@@ -16,20 +16,49 @@ class OrderServiceController extends GetxController {
   var orders = <Order>[].obs;
   var orderMenus = <OrderMenus>[].obs;
 
+  // Private method to check if the box is opened
+  bool isBoxOpen(Box? box) => box != null;
+
+  @override
+  void onInit() {
+    super.onInit();
+    openBox(); // Open the Hive box when the controller is initialized
+  }
+
   // Open the Hive box for orders
   Future<void> openBox() async {
-    if (_orderBox != null) return; // Already opened
-
     try {
       _orderBox = await Hive.openBox<Order>(_orderBoxName);
       _orderMenuBox = await Hive.openBox<OrderMenus>(_orderMenuBoxName);
       debugPrint('Order and Menu boxes opened successfully.');
 
       // Load orders and menus from Hive into observable lists
-      orders.addAll(_orderBox!.values.toList());
-      orderMenus.addAll(_orderMenuBox!.values.toList());
+      orders.assignAll(_orderBox!.values.toList());
+      orderMenus.assignAll(_orderMenuBox!.values.toList());
+
+      // Listen to changes in Hive box and update observable lists accordingly
+      _orderBox!.watch().listen((event) {
+        // Reload orders when any change occurs
+        orders.assignAll(_orderBox!.values.toList());
+      });
+
+      _orderMenuBox!.watch().listen((event) {
+        // Reload menus when any change occurs
+        orderMenus.assignAll(_orderMenuBox!.values.toList());
+      });
     } catch (e) {
       debugPrint('Error opening boxes: $e');
+    }
+  }
+
+  // Method to close the Hive box (usually called when the app is terminating)
+  Future<void> closeBox() async {
+    if (_orderBox != null) {
+      await _orderBox!.close();
+      _orderBox = null;
+      debugPrint('Order box closed successfully.');
+    } else {
+      debugPrint('Order box is already closed or not opened.');
     }
   }
 
@@ -62,112 +91,114 @@ class OrderServiceController extends GetxController {
     }
   }
 
-  // Get all OrderMenus by orderTrackId
+  // Method to get all OrderMenus by orderTrackId
   List<OrderMenus> getOrderMenus(String orderTrackId) {
     return orderMenus
         .where((menu) => menu.orderTrackId == orderTrackId)
         .toList();
   }
 
-  Future<List<dynamic>> getOrders(int page, int pageSize) async {
-    // Retrieve orders from your storage (e.g., Hive) and apply pagination
-    List<dynamic> allOrders =
-        getAllOrdersList(); // Your method to get all orders
-    return allOrders.skip((page - 1) * pageSize).take(pageSize).toList();
+// Method to fetch order details by orderTrackId
+  Order fetchOrderDetails(String orderTrackId) {
+    try {
+      // Fetch order from Hive instead of just the observable list to get the latest changes
+      final order = _orderBox!.values.firstWhere(
+        (o) => o.orderTrackId == orderTrackId,
+        orElse: () => Order.empty(),
+      );
+      return order;
+    } catch (e) {
+      debugPrint('Error fetching order details: $e');
+      return Order.empty(); // Return empty order to indicate failure
+    }
   }
 
-  // Get order details including order and corresponding menus
-  Order getOrderDetails(String orderTrackId) {
-    final order = orders.firstWhere(
-      (o) => o.orderTrackId == orderTrackId,
-    ); // Safely get the order or null
-
-    return order;
-
-    // final associatedMenus = getOrderMenus(orderTrackId);
-    // return {
-    //   'order': order,
-    //   'menus': associatedMenus,
-    // };
+  // Listen to changes in the box and update only the relevant order
+  void watchOrder(String orderTrackId) {
+    _orderBox!.watch().listen((event) {
+      // Check if the event affects the specific orderTrackId
+      final order = fetchOrderDetails(orderTrackId);
+      if (order.orderTrackId != Order.empty().orderTrackId) {
+        debugPrint('Order with trackId $orderTrackId has changed.');
+        // Update the specific order details if necessary in the UI or logic
+        // You can use GetX observables or methods here to notify the UI
+      }
+    });
   }
 
-  // Get all orders
+// Method to get a list of all orders
   List<Order> getAllOrdersList() {
-    return orders.toList(); // Return a list of all orders
+    try {
+      return _orderBox!.values.toList().cast<Order>();
+    } catch (e) {
+      debugPrint('Error fetching all orders: $e');
+      return []; // Return an empty list in case of an error
+    }
   }
 
-  // Delete all orders and their corresponding menus
+  // Method to listen for changes in the orders box and update the list when changes occur
+  void watchOrders() {
+    _orderBox!.watch().listen((event) {
+      // Whenever there's a change in the box, fetch the latest list of orders
+      final updatedOrders = getAllOrdersList();
+      debugPrint('Orders have changed. Updated orders list fetched.');
+
+      // If you're using GetX, you can update the observable orders list like this:
+      orders.value =
+          updatedOrders; // Assuming 'orders' is an RxList<Order> in GetX
+
+      // If you want to perform additional logic, do it here
+      // For example, notify the UI or any dependent widgets
+    });
+  }
+
+//-----------------------------------------------------------------------------------------------------------
+
+  // Method to delete all orders and their corresponding menus
   Future<void> deleteAllOrders() async {
     if (!isBoxOpen(_orderBox)) return;
 
     try {
-      await _orderBox!.clear(); // Clear the orders box
-      await _orderMenuBox!.clear(); // Clear the order menus box
-      orders.clear(); // Clear the observable list
-      orderMenus.clear(); // Clear the observable list
+      await _orderBox!.clear();
+      await _orderMenuBox!.clear();
+      orders.clear();
+      orderMenus.clear();
       debugPrint(
           'All orders and their corresponding menus deleted successfully.');
     } catch (e) {
       debugPrint('Error deleting all orders: $e');
-      rethrow; // Optional: rethrow to handle it higher up
+      rethrow;
     }
   }
 
-  // Other methods (updateOrderStatus, deleteOrder, etc.) remain unchanged...
-
-  // Private method to check if the box is opened
-  bool isBoxOpen(Box? box) => box != null;
-
-  // Close the box (called when the app is terminating)
-  Future<void> closeBox() async {
-    if (_orderBox != null) {
-      await _orderBox!.close();
-      _orderBox = null;
-      debugPrint('Order box closed successfully.');
-    } else {
-      debugPrint('Order box is already closed or not opened.');
-    }
-  }
-
-// Method to update the isPrepared status of an OrderMenus item
+  // Method to update the isPrepared status of an OrderMenus item
   Future<void> updateIsPrepared(
       String orderTrackId, String id, int isPrepared) async {
-    // Ensure the Hive box is open
     if (!isBoxOpen(_orderMenuBox)) return;
 
     try {
-      // Get the list of OrderMenus items by orderTrackId
       var menuList = _orderMenuBox!.values
           .where((menu) => menu.orderTrackId == orderTrackId)
           .toList();
-
       if (menuList.isEmpty) {
-        debugPrint('Error: No menu items found for orderTrackId $orderTrackId');
-        return; // Exit if no items are found for the given orderTrackId
+        debugPrint('No menu items found for orderTrackId $orderTrackId');
+        return;
       }
 
-      // Find the specific OrderMenus item using the provided id
-      var menu = menuList.firstWhere(
-        (menu) => menu.id == id,
-      ); // Exit if no matching menu was found
-
-      // Update the isPrepared value
+      var menu = menuList.firstWhere((menu) => menu.id == id);
       OrderMenus updatedMenu = menu.copyWith(isPrepared: isPrepared);
-
-      // Save the updated menu back to Hive
       await _saveUpdatedMenu(updatedMenu, menu);
 
-      // Handle menu deletion if isPrepared status is 4 (delete the menu)
+      // Handle deletion of menu if isPrepared status is 4
       if (isPrepared == 4) {
         await _deleteMenuItem(menu);
       }
 
-      // Update the order status based on the updated menu status
+      // Update order status based on the menu list
       await _updateOrderStatusBasedOnMenu(menuList, orderTrackId);
 
-      // Check if the order has no items left and show confirmation dialog
+      // If all items are deleted, prompt for order deletion
       if (menuList.isEmpty || menuList.every((menu) => menu.isPrepared == 4)) {
-        // If all items are deleted (isPrepared == 4), prompt for order deletion
         _showDeleteOrderConfirmation(orderTrackId);
       }
     } catch (e) {
@@ -175,88 +206,58 @@ class OrderServiceController extends GetxController {
     }
   }
 
-// Method to update the order status based on the prepared statuses of menu items
+  // Method to update order status based on prepared statuses of menu items
   Future<void> _updateOrderStatusBasedOnMenu(
       List<OrderMenus> menuList, String orderTrackId) async {
-    bool allPrepared = true; // Assume all items are prepared initially
-    bool allProcessed = true; // Assume all items are processed initially
+    bool allPrepared = menuList.every((menu) => menu.isPrepared == 1);
+    bool allProcessed = menuList.every((menu) => menu.isPrepared == 3);
 
-    // Iterate through the menu list to check the conditions
-    for (var menu in menuList) {
-      if (menu.isPrepared != 1) {
-        allPrepared = false; // At least one item is not prepared
-      }
-      if (menu.isPrepared != 3) {
-        allProcessed = false; // At least one item is not processed
-      }
-      // If both flags become false, no need to continue
-      if (!allPrepared && !allProcessed) break;
-    }
-
-    // Determine the order status based on the flags
     if (allPrepared) {
-      // If all items are prepared (status 1)
-      await _updateOrderStatus(orderTrackId, 1);
+      await _updateOrderStatus(orderTrackId, 1); // All items prepared
     } else if (allProcessed) {
-      // If all items are processed (status 3)
-      await _updateOrderStatus(orderTrackId, 3);
+      await _updateOrderStatus(orderTrackId, 3); // All items processed
     } else {
-      // Otherwise, default to status 2 (Cooking)
-      await _updateOrderStatus(orderTrackId, 2);
+      await _updateOrderStatus(orderTrackId, 2); // Cooking in progress
     }
   }
 
-// Method to save the updated menu back to Hive
+  // Method to save updated menu back to Hive
   Future<void> _saveUpdatedMenu(
       OrderMenus updatedMenu, OrderMenus oldMenu) async {
-    // Get the index of the old menu item in the Hive box
     int menuIndex = _orderMenuBox!.values.toList().indexOf(oldMenu);
 
     if (menuIndex != -1) {
-      // Save the updated menu at the correct index
       await _orderMenuBox!.putAt(menuIndex, updatedMenu);
 
-      // Update the observable list (orderMenus) to reflect the change
       int orderMenuIndex = orderMenus.indexWhere((m) => m.id == oldMenu.id);
       if (orderMenuIndex != -1) {
         orderMenus[orderMenuIndex] = updatedMenu;
       }
 
-      debugPrint(
-          'Menu status updated successfully: isPrepared = ${updatedMenu.isPrepared}');
+      debugPrint('Menu status updated: isPrepared = ${updatedMenu.isPrepared}');
     } else {
-      debugPrint(
-          'Error: Unable to find the menu in the Hive box for updating.');
+      debugPrint('Error: Menu not found in the Hive box.');
     }
   }
 
-// Method to delete a menu item if its isPrepared status is 4
+  // Method to delete a menu item if its isPrepared status is 4
   Future<void> _deleteMenuItem(OrderMenus menu) async {
-    // Remove the item from Hive
     await _orderMenuBox!.delete(menu.id);
-
-    // Remove the item from the observable list
     orderMenus.removeWhere((m) => m.id == menu.id);
-
     debugPrint('Menu item with id ${menu.id} deleted.');
   }
 
-// Method to update the order status
+  // Method to update order status in Hive
   Future<void> _updateOrderStatus(String orderTrackId, int newStatus) async {
-    // Ensure the box is open
     if (!isBoxOpen(_orderBox)) return;
 
     try {
-      // Attempt to find the order by orderTrackId
       final order = _orderBox!.values.firstWhere(
         (o) => o.orderTrackId == orderTrackId,
         orElse: () => throw Exception('Order not found'),
       );
 
-      // Create an updated order instance
       Order updatedOrder = order.copyWith(orderStatusId: newStatus);
-
-      // Save the updated order back to Hive
       int orderIndex = _orderBox!.values.toList().indexOf(order);
       await _orderBox!.putAt(orderIndex, updatedOrder);
 
@@ -267,23 +268,22 @@ class OrderServiceController extends GetxController {
     }
   }
 
-// Method to show confirmation dialog for deleting the order
+  // Method to show confirmation dialog for deleting an order
   void _showDeleteOrderConfirmation(String orderTrackId) {
     Get.defaultDialog(
       title: "Delete Order",
       middleText: "This order has no items left. Do you want to delete it?",
       onConfirm: () async {
-        // Delete the order from Hive and any related items
         await _deleteOrder(orderTrackId);
         Get.back(); // Close the dialog
       },
       onCancel: () {
-        Get.back(); // Just close the dialog
+        Get.back(); // Close the dialog without action
       },
     );
   }
 
-// Method to delete the order
+  // Method to delete an order
   Future<void> _deleteOrder(String orderTrackId) async {
     // Implement the logic to delete the order from Hive
     debugPrint('Order with orderTrackId: $orderTrackId deleted');

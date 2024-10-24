@@ -14,7 +14,7 @@ class NewOrderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FoodMenuController foodMenuController = Get.find();
+    final FoodMenuController foodMenuController = Get.put(FoodMenuController());
     final OrderServiceController orderServiceController = Get.find();
     final CartController cartController = Get.find();
 
@@ -204,13 +204,7 @@ class NewOrderPage extends StatelessWidget {
                         size: 40,
                       ),
                 onPressed: () {
-                  // Navigate to the kitchen tab
-                  if (tabController != null) {
-                    debugPrint('TabController is not null');
-                    tabController!.animateTo(1); // Switch to the kitchen tab
-                  } else {
-                    Get.toNamed("/kitchen");
-                  }
+                  Get.offAllNamed("dashboard");
                 },
               );
             }),

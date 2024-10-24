@@ -18,21 +18,10 @@ class OrderDetailsPage extends StatefulWidget {
 
 class _OrderDetailsPageState extends State<OrderDetailsPage> {
   final OrderServiceController orderServiceController = Get.find();
-
-  // Reactive variable for order details (single object)
   var orderInfo = Order.empty().obs;
-
-  // Reactive list of OrderMenus to track individual item status
   var orderMenus = <OrderMenus>[].obs;
-
-  // Loading state
+  var totalAmount = 0.0.obs;
   var isLoading = true.obs;
-
-  // Method to calculate total order amount
-  double _calculateTotalAmount(List<OrderMenus> orderMenus) {
-    return orderMenus.fold(
-        0.0, (total, item) => total + (item.price! * item.quantity!));
-  }
 
   @override
   void initState() {
@@ -40,25 +29,33 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
     _fetchOrderDetails();
   }
 
-  Future<void> _fetchOrderDetails() async {
+  void _fetchOrderDetails() {
     try {
-      debugPrint("am from updated order details");
-      orderInfo.value =
-          orderServiceController.getOrderDetails(widget.orderTrackId);
+      isLoading.value = true; // Set loading to true before fetching
+
+      orderInfo.value = orderInfo.value =
+          (orderServiceController.fetchOrderDetails(widget.orderTrackId));
+      if (orderInfo.value.orderTrackId != Order.empty().orderTrackId) {
+        // Start watching for changes to this specific order
+        orderServiceController.watchOrder(widget.orderTrackId);
+      }
       orderMenus.value =
           orderServiceController.getOrderMenus(widget.orderTrackId);
+      totalAmount.value = orderServiceController
+          .getOrderMenus(widget.orderTrackId)
+          .fold(0.0, (total, item) => total + (item.price! * item.quantity!));
+      debugPrint(
+          "Updated order details: Order Status ID - ${orderInfo.value.orderStatusId}");
     } catch (e) {
-      // Handle error (e.g., show a Snackbar)
       Get.snackbar('Error', 'Failed to load order details: $e');
     } finally {
-      isLoading.value = false; // Set loading to false
+      isLoading.value = false; // Set loading to false once fetching is done
     }
   }
 
   @override
   Widget build(BuildContext context) {
     // Calculate the total amount for the order
-    double totalAmount = _calculateTotalAmount(orderMenus);
 
     return Scaffold(
       appBar: AppBar(
@@ -98,7 +95,7 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
                               status,
                             );
                             // Refresh order menu to reflect changes
-                            await _fetchOrderDetails(); // Fetch updated data
+                            _fetchOrderDetails();
                           },
                         );
                       },

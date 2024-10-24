@@ -14,8 +14,8 @@ class KCartIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => IconButton(
-        icon: cartController.cartItems.isNotEmpty
+      () => SizedBox(
+        child: cartController.cartItems.isNotEmpty
             ? Badge.count(
                 count: cartController
                     .cartItems.length, // Display the total quantity of items
@@ -26,7 +26,6 @@ class KCartIcon extends StatelessWidget {
             : const Icon(
                 Icons.shopping_cart_outlined,
               ),
-        onPressed: () => Get.toNamed("/cart"),
       ),
     );
   }

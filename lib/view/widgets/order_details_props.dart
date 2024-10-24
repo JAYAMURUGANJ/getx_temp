@@ -20,6 +20,7 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
     String formattedDate =
         DateFormat('MMMM dd, yyyy, hh:mm a').format(orderDetails.startDateTime);
     return Card(
+      elevation: 8.0,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,22 +64,19 @@ class _OrderDetailsCardState extends State<OrderDetailsCard> {
                   Text(
                     "#${orderDetails.orderTrackId}",
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .copyWith(decoration: TextDecoration.underline),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    orderDetails.customerName == "Null"
+                    orderDetails.customerName!.isNotEmpty
                         ? "${orderDetails.customerName}"
                         : "CUSTOMER",
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Text(
-                    orderDetails.phoneNo == "Null"
-                        ? "${orderDetails.phoneNo}"
-                        : "PHONE NUMBER",
+                    orderDetails.phoneNo == null
+                        ? "PHONE NUMBER"
+                        : "${orderDetails.phoneNo}",
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   //Date Time

@@ -19,9 +19,6 @@ class CartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Cart'),
-      ),
       body: Obx(
         () {
           if (cartController.cartItems.isEmpty) {
@@ -190,7 +187,7 @@ class CartPage extends StatelessWidget {
                                           .clear();
                                       cartController.phoneController.clear();
 
-                                      Get.offAndToNamed("/kitchen");
+                                      Get.offAndToNamed("dashboard");
 
                                       Get.snackbar(
                                         'Order Placed',
@@ -461,6 +458,17 @@ class CartPage extends StatelessWidget {
 
   void updateUserandOrderType() {
     final formKey = GlobalKey<FormState>();
+
+    // Assuming you have a method to get the total orders count
+    final totalOrders =
+        orderService.getAllOrdersList().length; // Fetch total orders count
+    final defaultCustomerName =
+        'Customer ${totalOrders + 1}'; // Set default customer name
+
+    // Initialize customer name controller with the default name
+    cartController.customerNameController.text = defaultCustomerName;
+    cartController.phoneController.text = "";
+
     Get.bottomSheet(
       backgroundColor: Colors.white,
       SingleChildScrollView(

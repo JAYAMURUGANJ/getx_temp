@@ -1,21 +1,23 @@
 import 'package:cashcow/utils/extension/sizedbox.dart';
-import 'package:cashcow/view/widgets/order_details_props.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/hive/order_controller.dart';
 import '../../model/order.dart';
 import '../../model/order_type.dart';
+import '../../utils/widgets/appbar.dart';
+import '../widgets/dashboard_props.dart';
+import '../widgets/order_details_props.dart';
 import 'order_details.dart';
 
-class KitchenPage extends StatefulWidget {
-  const KitchenPage({super.key});
+class Dashboard extends StatefulWidget {
+  const Dashboard({super.key});
 
   @override
-  State<KitchenPage> createState() => _KitchenPageState();
+  State<Dashboard> createState() => _DashboardState();
 }
 
-class _KitchenPageState extends State<KitchenPage> {
+class _DashboardState extends State<Dashboard> {
   final OrderServiceController orderServiceController = Get.find();
 
   // TextEditingController for search
@@ -28,9 +30,15 @@ class _KitchenPageState extends State<KitchenPage> {
   final RxList<Order> filteredOrders =
       <Order>[].obs; // Observable list for filtered orders
 
+  // Order counts by status
+  RxInt confirmedCount = 0.obs;
+  RxInt cookingCount = 0.obs;
+  RxInt completedCount = 0.obs;
+
   @override
   void initState() {
     super.initState();
+    orderServiceController.watchOrders();
     loadOrders(); // Load orders on initialization
   }
 
@@ -40,12 +48,24 @@ class _KitchenPageState extends State<KitchenPage> {
     allOrders.assignAll(
         orderServiceController.getAllOrdersList()); // Populate all orders
     filterOrders(); // Apply initial filter to show all orders
+    calculateOrderCounts(); // Calculate initial order counts
 
-    // Watch for changes in orders and re-filter when they change
+    // Watch for changes in orders and re-filter and re-calculate when they change
     ever(orderServiceController.orders, (_) {
       allOrders.assignAll(orderServiceController.getAllOrdersList());
       filterOrders();
+      calculateOrderCounts(); // Recalculate counts whenever orders change
     });
+  }
+
+  // Function to calculate order counts by status
+  void calculateOrderCounts() {
+    confirmedCount.value =
+        allOrders.where((order) => order.orderStatusId == 1).length;
+    cookingCount.value =
+        allOrders.where((order) => order.orderStatusId == 2).length;
+    completedCount.value =
+        allOrders.where((order) => order.orderStatusId == 3).length;
   }
 
   // Function to filter orders based on search and filter criteria
@@ -72,43 +92,75 @@ class _KitchenPageState extends State<KitchenPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: kAppBar(),
       body: Obx(() {
-        if (filteredOrders.isEmpty) {
-          return _emptyKitchen(context);
-        }
-
-        return Column(
-          children: [
-            _buildSearchAndFilter(),
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredOrders.length,
-                itemBuilder: (context, index) {
-                  final order = filteredOrders[index];
-                  return GestureDetector(
-                    onTap: () => Get.to(() => OrderDetailsPage(
-                          orderTrackId: order.orderTrackId.toString(),
-                        )),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: OrderDetailsCard(order: order),
-                    ),
-                  );
-                },
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Order status cards at the top
+              Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Text(
+                  "Orders",
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
               ),
-            ),
-          ],
+              ordersDetailsCountCards(),
+              // Search and filter
+              10.ph,
+              _buildSearchAndFilter(),
+              // Order list
+              10.ph,
+              Expanded(
+                child: filteredOrders.isEmpty
+                    ? noOrdersFound(context)
+                    : ListView.builder(
+                        itemCount: filteredOrders.length,
+                        itemBuilder: (context, index) {
+                          final order = filteredOrders[index];
+                          return GestureDetector(
+                            onTap: () => Get.to(() => OrderDetailsPage(
+                                  orderTrackId: order.orderTrackId.toString(),
+                                )),
+                            child: OrderDetailsCard(order: order),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         );
       }),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Get.toNamed('/home'),
+        label: const Text("New Order"),
+        icon: const Icon(Icons.add_shopping_cart_sharp),
+      ),
+    );
+  }
+
+  Row ordersDetailsCountCards() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        buildOrderStatusCard('Confirmed', confirmedCount.value, Colors.blue),
+        buildOrderStatusCard(
+            'In Cooking', cookingCount.value, Colors.deepOrange),
+        buildOrderStatusCard(
+            'Completed', completedCount.value, Colors.lightGreen),
+      ],
     );
   }
 
   // Build search and filter widget
   Widget _buildSearchAndFilter() {
     return Padding(
-      padding: const EdgeInsets.all(6.0),
+      padding: const EdgeInsets.all(4.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: TextField(
@@ -121,7 +173,7 @@ class _KitchenPageState extends State<KitchenPage> {
                 prefixIcon: const Icon(Icons.search),
               ),
               onChanged: (value) {
-                filterOrders(); // Trigger filtering when search changes
+                filterOrders; // Trigger filtering when search changes
               },
             ),
           ),
@@ -167,7 +219,7 @@ class _KitchenPageState extends State<KitchenPage> {
     );
   }
 
-  Widget _emptyKitchen(BuildContext context) {
+  Widget noOrdersFound(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

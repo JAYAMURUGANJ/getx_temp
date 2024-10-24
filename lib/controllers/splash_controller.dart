@@ -13,6 +13,6 @@ class SplashScreenController extends GetxController {
     await Future.delayed(const Duration(seconds: 3));
     debugPrint("Navigating to Login Page");
     Get.offAllNamed(
-        '/login'); // Navigate to LoginPage and remove SplashScreen from stack
+        '/dashboard'); // Navigate to LoginPage and remove SplashScreen from stack
   }
 }

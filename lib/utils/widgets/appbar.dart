@@ -1,3 +1,4 @@
+import 'package:cashcow/utils/constants/images.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,11 +9,10 @@ AppBar kAppBar() {
   // Get the ThemeController instance
   final ThemeController themeController = Get.find();
   return AppBar(
-    leadingWidth: 30,
-    titleSpacing: 0.5,
-    leading: const Icon(
-      Icons.store,
-    ),
+    // leadingWidth: 30,
+    // titleSpacing: 0.5,
+    leading: Image.asset(LocalImages().kLogo),
+    centerTitle: true,
     title: const Text(
       "Cashcow",
     ), // Using the translation key for "login"

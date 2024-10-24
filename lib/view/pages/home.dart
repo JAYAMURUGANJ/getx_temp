@@ -1,4 +1,4 @@
-import 'package:cashcow/view/pages/kitchen.dart';
+import 'package:cashcow/view/pages/cart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,8 +22,7 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     // Initialize the TabController
-    _tabController =
-        TabController(length: tabs.length, vsync: this); // Assuming 3 tabs
+    _tabController = TabController(length: 3, vsync: this); // Assuming 3 tabs
   }
 
   @override
@@ -35,46 +34,44 @@ class _HomePageState extends State<HomePage>
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: tabs.length, // Number of tabs
+      length: 3, // Number of tabs
       child: Scaffold(
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: const Text('Cashcow'),
           bottom: TabBar(
             controller: _tabController,
-            tabs: tabs,
+            tabs: [
+              const Tab(
+                icon: Icon(Icons.add_shopping_cart),
+                text: 'New Order',
+              ),
+              Tab(
+                icon: KCartIcon(cartController: cartController),
+                text: 'cart',
+              ),
+              const Tab(
+                icon: Icon(Icons.payments_sharp),
+                text: 'Payment',
+              ),
+            ],
             indicatorSize: TabBarIndicatorSize.tab,
           ),
           actions: [
-            KCartIcon(cartController: cartController),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.settings))
           ],
         ),
         body: TabBarView(controller: _tabController, children: [
           NewOrderPage(
             tabController: _tabController,
           ),
-          const KitchenPage(),
+          CartPage(),
           const PaymentPage(),
         ]),
       ),
     );
   }
 }
-
-List<Widget> tabs = [
-  const Tab(
-    icon: Icon(Icons.add_shopping_cart),
-    text: 'New Order',
-  ),
-  const Tab(
-    icon: Icon(Icons.soup_kitchen_outlined),
-    text: 'Kitchen',
-  ),
-  const Tab(
-    icon: Icon(Icons.payments_sharp),
-    text: 'Payment',
-  ),
-];
 
 // Payment Page
 class PaymentPage extends StatelessWidget {

@@ -1,4 +1,5 @@
 import 'package:cashcow/view/pages/cart.dart';
+import 'package:cashcow/view/pages/dashboard.dart';
 import 'package:cashcow/view/pages/menu.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,6 @@ import 'package:get/get.dart';
 import 'app_translations.dart';
 import 'model/food_category.dart';
 import 'view/pages/home.dart';
-import 'view/pages/kitchen.dart';
 import 'view/pages/login.dart';
 import 'view/pages/new_order.dart';
 import 'view/pages/splash.dart';
@@ -37,10 +37,10 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/home', page: () => const HomePage()), // LoginPage route
         GetPage(
             name: '/neworder',
-            page: () => const NewOrderPage()), // LoginPage route
+            page: () => const NewOrderPage()), // NewOrder route
         GetPage(
-            name: '/kitchen',
-            page: () => const KitchenPage()), // LoginPage route
+            name: '/dashboard',
+            page: () => const Dashboard()), // Dashboard route
         GetPage(
             name: '/menu',
             page: () => MenuPage(
